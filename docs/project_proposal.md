@@ -24,17 +24,19 @@ The MAU supports vector, matrix, polynomial, and scalar arithmetic operations. B
 | `ui_out[7:0]`| Result output                     |
 | `uio[3:0]`   | SPI_clk, SPI_W, SPI_R, RES_CARRY  |
 
-
 ## Math Operations
 
-DOT2: 2x1 vector dot product\
-CROSS2: 2x2 matrix cross product\
-LEN2: squared magnitude\
-SCALE2: scale a 2x1 vector by a scalar\
-VADD2: adds two 2x1 vectors *requires additional hardware for true parallelism*\
-VSUB2: subtracts two 2x1 vectors *requires additional hardware for true parallelism*\
-POLY: first degree polynomial\
-SCMUL: scalar multiplication (in pairs)
+| Operation | Description                                                      |
+|-----------|------------------------------------------------------------------|
+| `DOT2`    | 2x1 vector dot product                                           |
+| `CROSS2`  | 2x2 matrix cross product                                         |
+| `LEN2`    | Squared magnitude                                                |
+| `SCALE2`  | Scale a 2x1 vector by a scalar                                   |
+| `VADD2`   | Adds two 2x1 vectors (requires additional hardware for true parallelism) |
+| `VSUB2`   | Subtracts two 2x1 vectors (requires additional hardware for true parallelism) |
+| `POLY`    | First degree polynomial                                          |
+| `SCMUL`   | Scalar multiplication (in pairs)                                 |
+
 
 ## System Architecture
 
