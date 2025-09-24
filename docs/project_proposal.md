@@ -31,7 +31,7 @@ SCALE2: scale a 2x1 vector by a scalar\
 VADD2: adds two 2x1 vectors *requires additional hardware for true parallelism*\
 VSUB2: subtracts two 2x1 vectors *requires additional hardware for true parallelism*\
 POLY: first degree polynomial\
-SCMUL: scalar multiplication (in pairs)\
+SCMUL: scalar multiplication (in pairs)
 
 ## System Architecture
 
