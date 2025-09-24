@@ -37,7 +37,6 @@ The MAU supports vector, matrix, polynomial, and scalar arithmetic operations. B
 | `POLY`    | First degree polynomial                                          |
 | `SCMUL`   | Scalar multiplication (in pairs)                                 |
 
-
 ## System Architecture
 
 The input bus ui_in[7:0] is 8 bits wide, inputting an 8 bit opcode and four 8 bit operands. The output bus ui_out[7:0] is fully allocated to result data.
