@@ -1,3 +1,4 @@
+
 <!---
 
 This file is used to generate your project datasheet. Please fill in the information below and delete any unused
@@ -11,11 +12,38 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## Project Description
 
-blah blah blah bleh bleh bleh bloo bloo bloo
+This project implements a Math Accelerator Unit (MAU) in SystemVerilog, designed for integration on a TinyTapeout chip. The MAU is a specialized hardware block that performs selected mathematical operations faster and more efficiently than a general purpose CPU. In a typical system, the CPU can offload arithmetic heavy tasks to the MAU, improving overall performance while freeing CPU resources for other operations.
+
+The MAU supports vector, matrix, polynomial, and scalar arithmetic operations. By integrating these capabilities into a dedicated hardware datapath, the design demonstrates how specialized accelerators can improve throughput for math intensive workloads while remaining resource efficient in a constrained silicon environment.
 
 ## TT I/O Assignments
 
-Convert the table in the block diagram into text, will be used in the future
+ui_in[7:0]: Instruction/Operand input
+ui_out[7:0]: Result output
+uio[3:0]: SPI_clk, SPI_W, SPI_R, RES_CARRY
+
+## Math Operations
+
+DOT2: 2x1 vector dot product
+CROSS2: 2x2 matrix cross product
+LEN2: squared magnitude
+SCALE2: scale a 2x1 vector by a scalar
+VADD2: adds two 2x1 vectors *requires additional hardware for true parallelism*
+VSUB2: subtracts two 2x1 vectors *requires additional hardware for true parallelism*
+POLY: first degree polynomial
+SCMUL: scalar multiplication (in pairs)
+
+## System Architecture
+
+The input bus ui_in[7:0] is 8 bits wide, inputting an 8 bit opcode and four 8 bit operands. The output bus ui_out[7:0] is fully allocated to result data.
+
+Because TinyTapeout limits the number of available pins, the MAU adopts a wave-based I/O scheme using SPI. Inputs and outputs are serialized into multiple 8-bit transfers synchronized with the SPI clock. The uio[3:0] bidirectional pins carry the SPI control and data signals.
+
+Each operand can be up to 8 bits wide. The opcode is transferred first as the first 8 bits in the first clock cycle and stored in a register. The remaining four 8 bit operands and transferred within the subsequent cycle, following the same flow.
+
+**3 bits for opcode, maybe remaining 5 bits says how many operands there are going to be?**
+
+The maximum output size, given four 8-bit inputs, is 17 bits. Since only 8 bits are available on the output bus, results are serialized in the same wave-based manner, requiring up to three 8-bit output cycles to transmit the full result.
 
 ## Project Work Schedule
 
