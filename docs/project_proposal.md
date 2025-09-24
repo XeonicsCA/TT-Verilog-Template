@@ -18,9 +18,12 @@ The MAU supports vector, matrix, polynomial, and scalar arithmetic operations. B
 
 ## TT I/O Assignments
 
-ui_in[7:0]: Instruction/Operand input
-ui_out[7:0]: Result output
-uio[3:0]: SPI_clk, SPI_W, SPI_R, RES_CARRY
+| Signal       | Description                       |
+|--------------|-----------------------------------|
+| `ui_in[7:0]` | Instruction / Operand input       |
+| `ui_out[7:0]`| Result output                     |
+| `uio[3:0]`   | SPI_clk, SPI_W, SPI_R, RES_CARRY  |
+
 
 ## Math Operations
 
