@@ -24,14 +24,14 @@ uio[3:0]: SPI_clk, SPI_W, SPI_R, RES_CARRY
 
 ## Math Operations
 
-DOT2: 2x1 vector dot product
-CROSS2: 2x2 matrix cross product
-LEN2: squared magnitude
-SCALE2: scale a 2x1 vector by a scalar
-VADD2: adds two 2x1 vectors *requires additional hardware for true parallelism*
-VSUB2: subtracts two 2x1 vectors *requires additional hardware for true parallelism*
-POLY: first degree polynomial
-SCMUL: scalar multiplication (in pairs)
+DOT2: 2x1 vector dot product\
+CROSS2: 2x2 matrix cross product\
+LEN2: squared magnitude\
+SCALE2: scale a 2x1 vector by a scalar\
+VADD2: adds two 2x1 vectors *requires additional hardware for true parallelism*\
+VSUB2: subtracts two 2x1 vectors *requires additional hardware for true parallelism*\
+POLY: first degree polynomial\
+SCMUL: scalar multiplication (in pairs)\
 
 ## System Architecture
 
@@ -44,6 +44,8 @@ Each operand can be up to 8 bits wide. The opcode is transferred first as the fi
 **3 bits for opcode, maybe remaining 5 bits says how many operands there are going to be?**
 
 The maximum output size, given four 8-bit inputs, is 17 bits. Since only 8 bits are available on the output bus, results are serialized in the same wave-based manner, requiring up to three 8-bit output cycles to transmit the full result.
+
+To implement some speedup to differentiate the MAU from a typical CPU, our design has parallel multipliers to enable Single Instruction/Multiple Data (SIMD). This will be the main source of the speedup observed in the MAU, as a typical CPU has a single ALU datapath.
 
 ## Project Work Schedule
 
