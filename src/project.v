@@ -24,7 +24,7 @@ module tt_um_8_prog_counter (
 
   wire en = ctrl_q[0];
   wire load = ctrl_q[1];
-  wire oe ctrl_1[2];
+  wire oe = ctrl_1[2];
 
   // detect one cycle pulse of load
   logic load_q;
