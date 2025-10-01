@@ -30,7 +30,7 @@ module tt_um_8_prog_counter (
   logic load_q;
   wire load_pulse = load & ~load_q;
 
-  always @(posedge clk, or negedge rst_n) begin
+  always @(posedge clk or negedge rst_n) begin
     if (!rst_n) load_q <= 1'b0;
     else load_q <= load;
   end
