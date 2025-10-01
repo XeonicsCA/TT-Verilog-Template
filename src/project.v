@@ -37,9 +37,9 @@ module tt_um_8_prog_counter (
   end
 
   // output
-  assign uo_out = oe ? count : 1'bz;      // high-z output if oe not enabled
+  assign uo_out = oe ? count : 8'bz;      // high-z output if oe not enabled
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, uio_in[7:3], 1'b0};     // concat and takes bitwise & (last bit set to 0, so always 0)
+  wire _unused = &{ena, uio_out[7:0], uio_in[7:3], 1'b0};     // concat and takes bitwise & (last bit set to 0, so always 0)
 
 endmodule
