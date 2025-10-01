@@ -17,7 +17,7 @@ module tt_um_8_prog_counter (
 );
 
   // control loading/high-z using uio_in as inputs
-  wire en = uio_in[0]
+  wire en = uio_in[0];
   wire load = uio_in[1];
   wire oe = uio[2];
   assign uio_oe = 8'h00;  // set uio to input
@@ -36,7 +36,7 @@ module tt_um_8_prog_counter (
   end
 
   // output
-  assign uo_out = oe ? count : 1'bz      // high-z output if oe not enabled
+  assign uo_out = oe ? count : 1'bz;      // high-z output if oe not enabled
 
   // List all unused inputs to prevent warnings
   wire _unused = &{ena, uio_in[7:3], 1'b0};     // concat and takes bitwise & (last bit set to 0, so always 0)
