@@ -19,7 +19,7 @@ module tt_um_8_prog_counter (
   // control loading/high-z using uio_in as inputs
   wire en = uio_in[0];
   wire load = uio_in[1];
-  wire oe = uio[2];
+  wire oe = uio_in[2];
   assign uio_oe = 8'h00;  // set uio to input
 
   // variable to hold counter val
@@ -30,9 +30,10 @@ module tt_um_8_prog_counter (
     if (!rst_n) begin
       count <= 8'h00;           // reset to 0
     end else if (load) begin
-      count <= uio_in;          // load in value on rising edge
+      count <= ui_in;          // load in value on rising edge
     end else if (en) begin
       count <= count + 8'h01;   // increment count by 1 bit
+    end
   end
 
   // output
