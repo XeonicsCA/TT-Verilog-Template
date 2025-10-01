@@ -5,7 +5,10 @@
 
 `default_nettype none
 
-module tt_um_8_prog_counter (
+module tt_um_8_prog_counter #(
+  parameter bit DEFAULT_EN = 1'b1,    // count even if ui_in[0] == 0;
+  parameter bit DEFAULT_DRIVE = 1'b1  // drive uio by default after reset
+) (
     input  wire [7:0] ui_in,    // Dedicated inputs
     output wire [7:0] uo_out,   // Dedicated outputs
     input  wire [7:0] uio_in,   // IOs: Input path
@@ -22,9 +25,9 @@ module tt_um_8_prog_counter (
     else ctrl_q <= ui_in[2:0];
   end
 
-  wire en = ctrl_q[0];
+  wire en = DEFAULT_EN ? 1'b1 : ctrl_q[0];
   wire load = ctrl_q[1];
-  wire oe = ctrl_q[2];
+  wire oe = DEFAULT_DRIVE ? 1'b1 : ctrl_q[2];
 
   // detect one cycle pulse of load
   logic load_q;
