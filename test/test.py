@@ -44,7 +44,7 @@ async def test_count_50(dut):
     dut._log.info("Test counter increments to 50")
 
     # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, unit="us")
+    clock = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clock.start())
 
     # Reset
@@ -55,7 +55,9 @@ async def test_count_50(dut):
     dut.rst_n.value = 0
     await ClockCycles(dut.clk, 10)
     dut.rst_n.value = 1
+    await ClockCycles(dut.clk, 1)
 
+    dut.ui_in.value = 0b00000001
     await ClockCycles(dut.clk, 50)
-    # assert dut.uo_out.value == 50
     dut._log.info(f"uo_out={int(dut.uo_out.value)}")
+    assert dut.uo_out.value == 50

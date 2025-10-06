@@ -23,13 +23,14 @@ module tt_um_example (
 
   // counter
   logic [7:0] count;
+  wire en = ui_in[0];
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) count <= 8'h00;            // reset counter
-    else count <= count + 8'h01;   // increment counter
+    else if (en) count <= count + 8'h01;   // increment counter
   end
   assign uo_out = count;
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, ui_in, uio_in, 1'b0};
+  wire _unused = &{ena, ui_in[7:1], uio_in, 1'b0};
 
 endmodule
