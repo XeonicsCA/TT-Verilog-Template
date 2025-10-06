@@ -87,6 +87,7 @@ Verilog coding and timing verification using CocoTB - Now until Oct 29 (4 weeks 
 Task 2: Sub-block (verilog) evaluation - Oct 29 <br>
 
 Synthesis and verification with OpenLane and CocoTB - Oct 29 until Nov 19 (3 weeks time)
+ - Update test.py?
  - Unsure about this workflow, will know more as project progresses
  - Work needs to be done to turn verilog modules into the standard cell designs provided by TT? and deciding placement within the tile, and then verification?
  - 1 week synthesis, 2 weeks verification/fixing?
