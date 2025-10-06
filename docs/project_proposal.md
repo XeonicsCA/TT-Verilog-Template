@@ -64,7 +64,7 @@ Implemented using an 8-bit RX register and 1:5 demux, the RX register samples MO
 
 Decode Stage:
 
-The lane registers holding the operands will then be fed into the correct ALU inputs with pathing determined by a FSM; switching states (input wiring) is performed based on the opcode. Any flags provided in the opcode will also be directed here to the corresponding hardware it enables/disables.
+The lane registers holding the operands will then be fed into the correct ALU inputs with pathing determined by a FSM or LUT, activating control signals based on the opcode. Any flags provided in the opcode will also be directed here to the corresponding hardware it enables/disables.
 
 ALU Stage:
 
