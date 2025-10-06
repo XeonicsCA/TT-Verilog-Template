@@ -78,27 +78,24 @@ Similar to the RX stage, the TX stage is implemented using 3-5 (depending on out
 
 ## Project Work Schedule
 
-Verilog coding and timing verification using CocoTB - Now until Oct 22 (4 weeks time)
- - Finalize block diagram with control signals (1 week?)
- - Decide how to split up work (RX/TX stages should be similar, M/A stage logic should be standardized, Decode stage might be more difficult depending on finalized ctrl signals)
- - Code in verilog individual components (2 weeks?)
- - Verify timing using CocoTB (1 week? not sure if this can be done individually or needs to be all together)
+Verilog coding and timing verification using CocoTB - Now until Oct 29 (4 weeks time)
+ - Finalize block diagram with control signals (1 week)
+ - Split up work (RX/TX stages should be similar, M/A stage logic should be standardized, Decode stage might be more difficult depending on finalized ctrl signals)
+ - Code in verilog individual components (1 week)
+ - Verify timing using CocoTB (1 week? using github actions?)
 
-Task 2: Sub-block (verilog) evaluation - Oct 22 <br>
+Task 2: Sub-block (verilog) evaluation - Oct 29 <br>
 
-Synthesis and verification with OpenLane and CocoTB - Oct 22 until Nov 12 (3 weeks time)
- - Unsure how this is done, will know more as project progresses
- - Guessing work needs to be done to turn our verilog logic blocks into the standard cell designs provided by TT and deciding placement within the tile, and then verification
+Synthesis and verification with OpenLane and CocoTB - Oct 29 until Nov 19 (3 weeks time)
+ - Unsure about this workflow, will know more as project progresses
+ - Work needs to be done to turn verilog modules into the standard cell designs provided by TT? and deciding placement within the tile, and then verification?
  - 1 week synthesis, 2 weeks verification/fixing?
 
-Task 3: System integration - Nov 12
+Task 3: System integration - Nov 19
  - Clean up any loose ends
 
-Final verification - Nov 19
- - Just some documentation left
-
-Completed documentation and github - Nov 26
- - Done by this point, project should be ready for tapeout
+Final verification, completed documentation and github - Nov 26
+ - Wrap up documentation and submission
 
 Evaluation of final submissions and docs - Dec 3
- - Submission for tapeout
+ - Submit for tapeout
