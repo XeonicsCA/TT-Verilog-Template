@@ -58,4 +58,4 @@ async def test_count_50(dut):
 
     await ClockCycles(dut.clk, 50)
     # assert dut.uo_out.value == 50
-    dut._log.info(f"uo_out={dut.uo_out.value}")
+    dut._log.info(f"uo_out={int(dut.uo_out.value)}")
