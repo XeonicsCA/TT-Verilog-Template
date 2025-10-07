@@ -30,24 +30,6 @@ The MAU supports vector, matrix, polynomial, and scalar arithmetic operations. B
 
 ## Math Operations
 
-|      Formula          | Operation | Description                                                      |
-|-----------------------|-----------|------------------------------------------------------------------|
-|      x<sub>0</sub>x<sub>1</sub> + y<sub>0</sub>y<sub>1</sub>      | `DOT2`    | 2x1 vector dot product                                           |
-|       x<sub>0</sub>a + y<sub>0</sub>b       | `WSUM`    | Weighted sum                                                     |
-|      x<sub>0</sub>ûx + y<sub>0</sub>ûy      | `PROJU`   | Projection onto unit vector                                      |
-|      x<sub>0</sub>x<sub>1</sub> - y<sub>0</sub>y<sub>1</sub>      | `DIFF2`   | Difference of products                                           |
-|      x<sub>0</sub>x<sub>1</sub> + y<sub>0</sub>y<sub>1</sub>      | `SQM`     | Squared magnitude                                                |
-|      x<sub>0</sub>y<sub>1</sub> - y<sub>0</sub>x<sub>1</sub>      | `DET2`    | 2x2 matrix determinant                                           |
-| (x<sub>0</sub>-x<sub>1</sub>)² - (y<sub>0</sub>-y<sub>1</sub>)² | `DIST2`   | Squared distance                                                 |
-|       ax + b       | `POLY`    | First degree polynomial                                          |
-|     x<sub>0</sub>+y<sub>0</sub> , x<sub>1</sub>+y<sub>1</sub>     | `VADD2`   | Adds two 2x1 vectors                                             |
-|     x<sub>0</sub>-y<sub>0</sub> , x<sub>1</sub>-y<sub>1</sub>     | `VSUB2`   | Subtracts two 2x1 vectors                                        |
-|      x<sub>0</sub>x<sub>1</sub> , y<sub>0</sub>y<sub>1</sub>      | `SCMUL`   | Scalar multiplication (in pairs)                                 |
-|       x<sub>0</sub>c , x<sub>1</sub>c       | `SCALE2`  | Scale a 2x1 vector by a scalar                                   |
-|       x<sub>0</sub>c + x<sub>1</sub>c       | `SCSUM`   | Scaled sum                                                       |
-|      x<sub>0</sub> + c(y<sub>1</sub>-y<sub>0</sub>)    | `LERPX`   | Linear interpolation in lane X                                   |
-|      y<sub>0</sub> + c(x<sub>1</sub>-y<sub>0</sub>)    | `LERPY`   | Linear interpolation in lane Y                                   |
-
 | Formula                                                         | Operation | Description                      | Signals                                                                   |
 | --------------------------------------------------------------- | --------- | -------------------------------- | ------------------------------------------------------------------------- |
 | x<sub>0</sub>x<sub>1</sub> + y<sub>0</sub>y<sub>1</sub>         | `DOT2`    | 2x1 vector dot product           | N/A                                                                       |
