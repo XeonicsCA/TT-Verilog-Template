@@ -32,7 +32,7 @@ The MAU supports vector, matrix, polynomial, and scalar arithmetic operations. B
 
 |      Formula          | Operation | Description                                                      |
 |-----------------------|-----------|------------------------------------------------------------------|
-|      x<sub>(0)x1 + y0y1      | `DOT2`    | 2x1 vector dot product                                           |
+|      x<sub>0</sub>x1 + y0y1      | `DOT2`    | 2x1 vector dot product                                           |
 |       x0a + y0b       | `WSUM`    | Weighted sum                                                     |
 |      x0ux + y0uy      | `PROJU`   | Projection onto unit vector                                      |
 |      x0x1 - y0y1      | `DIFF2`   | Difference of products                                           |
