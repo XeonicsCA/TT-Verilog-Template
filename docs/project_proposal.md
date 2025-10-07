@@ -48,6 +48,25 @@ The MAU supports vector, matrix, polynomial, and scalar arithmetic operations. B
 |      x<sub>0</sub> + c(y<sub>1</sub>-y<sub>0</sub>)    | `LERPX`   | Linear interpolation in lane X                                   |
 |      y<sub>0</sub> + c(x<sub>1</sub>-y<sub>0</sub>)    | `LERPY`   | Linear interpolation in lane Y                                   |
 
+| Formula                                                         | Operation | Description                      | Signals                                                                   |
+| --------------------------------------------------------------- | --------- | -------------------------------- | ------------------------------------------------------------------------- |
+| x<sub>0</sub>x<sub>1</sub> + y<sub>0</sub>y<sub>1</sub>         | `DOT2`    | 2x1 vector dot product           | N/A                                                                       |
+| x<sub>0</sub>a + y<sub>0</sub>b                                 | `WSUM`    | Weighted sum                     | N/A                                                                       |
+| x<sub>0</sub>ûx + y<sub>0</sub>ûy                             | `PROJU`   | Projection onto unit vector      | N/A                                                                       |
+| x<sub>0</sub>x<sub>1</sub> - y<sub>0</sub>y<sub>1</sub>         | `DIFF2`   | Difference of products           | post sub                                                                  |
+| x<sub>0</sub>x<sub>1</sub> + y<sub>0</sub>y<sub>1</sub>         | `SQM`     | Squared magnitude                | N/A                                                                       |
+| x<sub>0</sub>y<sub>1</sub> - y<sub>0</sub>x<sub>1</sub>         | `DET2`    | 2x2 matrix determinant           | post sub                                                                  |
+| (x<sub>0</sub>−x<sub>1</sub>)² − (y<sub>0</sub>−y<sub>1</sub>)² | `DIST2`   | Squared distance                 | X and Y lane pre sub, mul_sel (repeat), post sub                          |
+| ax + b                                                          | `POLY`    | First degree polynomial          | Y lane mul_sel (1/skip)                                                   |
+| x<sub>0</sub>+y<sub>0</sub> , x<sub>1</sub>+y<sub>1</sub>       | `VADD2`   | Adds two 2x1 vectors             | mul_sel (1/skip), post add skip                                           |
+| x<sub>0</sub>−y<sub>0</sub> , x<sub>1</sub>−y<sub>1</sub>       | `VSUB2`   | Subtracts two 2x1 vectors        | 2x pre sub, mul_sel (1/skip), post skip                                   |
+| x<sub>0</sub>x<sub>1</sub> , y<sub>0</sub>y<sub>1</sub>         | `SCMUL`   | Scalar multiplication (in pairs) | post skip                                                                 |
+| x<sub>0</sub>c , x<sub>1</sub>c                                 | `SCALE2`  | Scale a 2x1 vector by a scalar   | post skip                                                                 |
+| x<sub>0</sub>c + x<sub>1</sub>c                                 | `SCSUM`   | Scaled sum                       | N/A                                                                       |
+| x<sub>0</sub> + c(y<sub>1</sub>−y<sub>0</sub>)                  | `LERPX`   | Linear interpolation in lane X   | X lane pre (0/skip) and mul_sel (1/skip), Y lane mul_sel (c, from X lane) |
+| y<sub>0</sub> + c(x<sub>1</sub>−x<sub>0</sub>)                  | `LERPY`   | Linear interpolation in lane Y   | Y lane pre (0/skip) and mul_sel (1/skip), X lane mul_sel (c, from Y lane) |
+
+
 ## System Architecture
 
 Instructions consist of 40-bits - 8-bits for the opcode/flags and 8-bits for each of the four operands.
