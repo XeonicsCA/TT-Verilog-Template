@@ -36,7 +36,7 @@ The MAU supports vector, matrix, polynomial, and scalar arithmetic operations. B
 |       x<sub>0</sub>a + y<sub>0</sub>b       | `WSUM`    | Weighted sum                                                     |
 |      x<sub>0</sub>ux + y<sub>0</sub>uy      | `PROJU`   | Projection onto unit vector                                      |
 |      x<sub>0</sub>x<sub>1</sub> - y<sub>0</sub>y<sub>1</sub>      | `DIFF2`   | Difference of products                                           |
-|      x<sub>0</sub>x<sub>1</sub> + y>sub>0</sub>y<sub>1</sub>      | `SQM`     | Squared magnitude                                                |
+|      x<sub>0</sub>x<sub>1</sub> + y<sub>0</sub>y<sub>1</sub>      | `SQM`     | Squared magnitude                                                |
 |      x<sub>0</sub>y<sub>1</sub> - y<sub>0</sub>x<sub>1</sub>      | `DET2`    | 2x2 matrix determinant                                           |
 | (x<sub>0</sub>-x<sub>1</sub>)^2 - (y<sub>0</sub>-y<sub>1</sub>)^2 | `DIST2`   | Squared distance                                                 |
 |       ax + b       | `POLY`    | First degree polynomial                                          |
