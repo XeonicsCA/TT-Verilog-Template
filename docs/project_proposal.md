@@ -32,21 +32,21 @@ The MAU supports vector, matrix, polynomial, and scalar arithmetic operations. B
 
 |      Formula          | Operation | Description                                                      |
 |-----------------------|-----------|------------------------------------------------------------------|
-|      x<sub>0</sub>x1 + y0y1      | `DOT2`    | 2x1 vector dot product                                           |
-|       x0a + y0b       | `WSUM`    | Weighted sum                                                     |
-|      x0ux + y0uy      | `PROJU`   | Projection onto unit vector                                      |
-|      x0x1 - y0y1      | `DIFF2`   | Difference of products                                           |
-|      x0x1 + y0y1      | `SQM`     | Squared magnitude                                                |
-|      x0y1 - y0x1      | `DET2`    | 2x2 matrix determinant                                           |
-| (x0-x1)^2 - (y0-y1)^2 | `DIST2`   | Squared distance                                                 |
-|       x0x - y01       | `POLY`    | First degree polynomial                                          |
-|     x0+y0 , x1+y1     | `VADD2`   | Adds two 2x1 vectors                                             |
-|     x0-y0 , x1-y1     | `VSUB2`   | Subtracts two 2x1 vectors                                        |
-|      x0x1 , y0y1      | `SCMUL`   | Scalar multiplication (in pairs)                                 |
-|       x0c , x1c       | `SCALE2`  | Scale a 2x1 vector by a scalar                                   |
-|       x0c + x1c       | `SCSUM`   | Scaled sum                                                       |
-|      x0 + c(y1-y0)    | `LERPX`   | Linear interpolation in lane X                                   |
-|      y0 + c(y1-y0)    | `LERPY`   | Linear interpolation in lane Y                                   |
+|      x<sub>0</sub>x<sub>1</sub> + y<sub>0</sub>y<sub>1</sub>      | `DOT2`    | 2x1 vector dot product                                           |
+|       x<sub>0</sub>a + y<sub>0</sub>b       | `WSUM`    | Weighted sum                                                     |
+|      x<sub>0</sub>ux + y<sub>0</sub>uy      | `PROJU`   | Projection onto unit vector                                      |
+|      x<sub>0</sub>x<sub>1</sub> - y<sub>0</sub>y<sub>1</sub>      | `DIFF2`   | Difference of products                                           |
+|      x<sub>0</sub>x<sub>1</sub> + y>sub>0</sub>y<sub>1</sub>      | `SQM`     | Squared magnitude                                                |
+|      x<sub>0</sub>y<sub>1</sub> - y<sub>0</sub>x<sub>1</sub>      | `DET2`    | 2x2 matrix determinant                                           |
+| (x<sub>0</sub>-x<sub>1</sub>)^2 - (y<sub>0</sub>-y<sub>1</sub>)^2 | `DIST2`   | Squared distance                                                 |
+|       x<sub>0</sub>x - y01       | `POLY`    | First degree polynomial                                          |
+|     x<sub>0</sub>+y<sub>0</sub> , x<sub>1</sub>+y<sub>1</sub>     | `VADD2`   | Adds two 2x1 vectors                                             |
+|     x<sub>0</sub>-y<sub>0</sub> , x<sub>1</sub>-y<sub>1</sub>     | `VSUB2`   | Subtracts two 2x1 vectors                                        |
+|      x<sub>0</sub>x<sub>1</sub> , y<sub>0</sub>y<sub>1</sub>      | `SCMUL`   | Scalar multiplication (in pairs)                                 |
+|       x<sub>0</sub>c , x<sub>1</sub>c       | `SCALE2`  | Scale a 2x1 vector by a scalar                                   |
+|       x<sub>0</sub>c + x<sub>1</sub>c       | `SCSUM`   | Scaled sum                                                       |
+|      x<sub>0</sub> + c(y<sub>1</sub>-y<sub>0</sub>)    | `LERPX`   | Linear interpolation in lane X                                   |
+|      y<sub>0</sub> + c(y<sub>1</sub>-y<sub>0</sub>)    | `LERPY`   | Linear interpolation in lane Y                                   |
 
 ## System Architecture
 
