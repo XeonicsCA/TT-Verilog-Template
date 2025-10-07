@@ -38,7 +38,7 @@ The MAU supports vector, matrix, polynomial, and scalar arithmetic operations. B
 |      x<sub>0</sub>x<sub>1</sub> - y<sub>0</sub>y<sub>1</sub>      | `DIFF2`   | Difference of products                                           |
 |      x<sub>0</sub>x<sub>1</sub> + y<sub>0</sub>y<sub>1</sub>      | `SQM`     | Squared magnitude                                                |
 |      x<sub>0</sub>y<sub>1</sub> - y<sub>0</sub>x<sub>1</sub>      | `DET2`    | 2x2 matrix determinant                                           |
-| (x<sub>0</sub>-x<sub>1</sub>)^2 - (y<sub>0</sub>-y<sub>1</sub>)^2 | `DIST2`   | Squared distance                                                 |
+| (x<sub>0</sub>-x<sub>1</sub>)² - (y<sub>0</sub>-y<sub>1</sub>)² | `DIST2`   | Squared distance                                                 |
 |       ax + b       | `POLY`    | First degree polynomial                                          |
 |     x<sub>0</sub>+y<sub>0</sub> , x<sub>1</sub>+y<sub>1</sub>     | `VADD2`   | Adds two 2x1 vectors                                             |
 |     x<sub>0</sub>-y<sub>0</sub> , x<sub>1</sub>-y<sub>1</sub>     | `VSUB2`   | Subtracts two 2x1 vectors                                        |
