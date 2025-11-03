@@ -57,7 +57,7 @@ module add18 (
 		end
 		// if enabled, output add or sub
 		else begin
-			tmp = sub ? ({1'b0, a} - {1'b0, b} : {1'b0, a} + {1'b0, b});
+			tmp = sub ? ({1'b0, a} - {1'b0, b}) : ({1'b0, a} + {1'b0, b});
 			res = tmp[17:0];
 			carry = tmp[18];
 		end
@@ -101,7 +101,7 @@ module alu_stage (
 	// returns 9 bit value to be fed into m1
 	function automatic logic [8:0] sel_mul_in (
 		input logic [2:0] sel,
-		input logic [8:0] in0, in1, pre_res
+		input logic [8:0] in0, in1, pre_res,
 		input logic [7:0] c_other
 	);
 		case (sel)
@@ -110,7 +110,7 @@ module alu_stage (
 			3'd2 : sel_mul_in = pre_res;
 			3'd3 : sel_mul_in = {1'b0, c_other};
 			3'd4 : sel_mul_in = 9'b1;
-			detault : sel_mul_in = 9'd0;
+			default : sel_mul_in = 9'd0;
 		endcase
 	endfunction
 
