@@ -27,21 +27,19 @@ typedef struct packed {
 } alu_ctrl_t;
 
 module tt_um_mau_top (
-    // Global signals
-    input  logic       clk,        // System clock (TT clock)
-    input  logic       rst_n,      // Active low reset (TT global reset)
-    
-    // SPI Interface (matches TinyTapeout I/O)
-    input  logic [7:0] ui_in,      // MOSI[7:0] - Instruction/Operand input
-    output logic [7:0] ui_out,     // MISO[7:0] - Result output
-    
-    // Bidirectional I/O for SPI control
-    input  logic       spi_clk,    // SPI clock (uio[0])
-    input  logic       spi_w,      // SPI write enable (uio[1])
-    input  logic       spi_r,      // SPI read enable (uio[2])
-    output logic       res_carry   // Result carry output (uio[3])
+    input  wire [7:0] ui_in,    // MOSI[7:0] - Instruction/Operand input
+    output wire [7:0] uo_out,   // MISO[7:0] - Result output
+    input  wire [7:0] uio_in,   // IOs: Input path, SPI clock (uio_in[0]), SPI write enable (uio_in[1]), SPI read enable (uio_in[2])
+    output wire [7:0] uio_out,  // IOs: Output path, Result carry output (uio_out[3])
+    output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
+    input  wire       ena,      // always 1 when the design is powered, so you can ignore it
+    input  wire       clk,      // clock
+    input  wire       rst_n     // reset_n - low to reset
 );
 
+    // setup bidirectional IO
+    assign uio_oe = 8'b00001000;
+    
     // Internal interconnect signals
     
     // RX to Decode signals
@@ -79,8 +77,8 @@ module tt_um_mau_top (
     rx rx_inst (
         .clk        (clk),
         .rst_n      (rst_n),
-        .spi_clk    (spi_clk),
-        .spi_w      (spi_w),
+        .spi_clk    (uio_in[0]),
+        .spi_w      (uio_in[1]),
         .mosi       (ui_in),        // 8-bit MOSI input
         .alu_ready  (alu_ready),    // From decode stage
         
@@ -97,8 +95,8 @@ module tt_um_mau_top (
     decode_stage decode_inst (
         .clk        (clk),
         .rst_n      (rst_n),
-        .rx_valid   (rx_valid),     // From RX
-        .cmd_ready  (cmd_ready),    // From ALU
+        .rx_valid_in   (rx_valid),     // From RX
+        .cmd_ready_in  (cmd_ready),    // From ALU
         
         // Inputs from RX
         .op         (rx_op),
@@ -108,8 +106,8 @@ module tt_um_mau_top (
         .b2         (rx_b2),
         
         // Outputs
-        .alu_ready  (alu_ready),    // To RX
-        .cmd_valid  (cmd_valid),    // To ALU
+        .alu_ready_out  (alu_ready),    // To RX
+        .cmd_valid_out  (cmd_valid),    // To ALU
         .ctrl       (alu_ctrl),     // To ALU
         .x0         (dec_x0),
         .x1         (dec_x1),
@@ -144,8 +142,8 @@ module tt_um_mau_top (
     tx tx_inst (
         .clk        (clk),
         .rst_n      (rst_n),
-        .spi_clk    (spi_clk),
-        .spi_r      (spi_r),
+        .spi_clk    (uio_in[0]),
+        .spi_r      (uio_in[2]),
         
         // From ALU
         .res_data   (alu_result),
@@ -154,9 +152,12 @@ module tt_um_mau_top (
         .res_ready  (res_ready),    // To ALU
         
         // Outputs
-        .miso       (ui_out),        // 8-bit MISO output
-        .carry_out  (res_carry),     // Carry to uio[3]
+        .miso       (uo_out),        // 8-bit MISO output
+        .carry_out  (uio_out[3]),     // Carry to uio_out[3]
         .tx_done    (tx_done)
     );
+
+    // unused inputs to prevent warnings
+    wire _unused = &{uio_out[7:4], uio_out[2:0], ena, 1'b0};
 
 endmodule

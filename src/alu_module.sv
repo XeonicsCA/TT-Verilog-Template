@@ -7,6 +7,7 @@ module pre_add8 (
 	output 	logic [8:0]		out9		// 9 bit output (going to multiplier)
 );
 	// concat in0 and in1 with 0 in MSB for 9 bit values
+	logic [8:0] a, b;
 	assign a = {1'b0, in0};
 	assign b = {1'b0, in1};
 	always_comb begin
@@ -16,7 +17,7 @@ module pre_add8 (
 		end
 		// if enabled, output add or sub
 		else begin
-			out9 = sub ? (a-b) : (a+b)
+			out9 = sub ? (a-b) : (a+b);
 		end
 	end
 endmodule
@@ -50,6 +51,11 @@ module add18 (
 );
 	logic [18:0] tmp;
 	always_comb begin
+		// default values
+		tmp = '0;
+		res = '0;
+		carry = 1'b0;
+		
 		// if not enabled, concat lower 9 bits of a and b
 		if (!en) begin
 			res = {a[8:0], b[8:0]};
@@ -76,8 +82,8 @@ module alu_stage (
 	output	logic			res_valid,	// alu result out is valid
 	input	logic			res_ready,	// rx is ready for a result
 
-	output	logic [17:0]	res_q;
-	output	logic			carry_q;
+	output	logic [17:0]	res_q,
+	output	logic			carry_q
 );
 	// single-cycle, consumes when both sides ready
 	// determine when to perform a new command
@@ -130,11 +136,11 @@ module alu_stage (
 					.m1(y_m1),
 					.p(y_prod));
 
-	// post adder
+	// post addercltr
 	logic [17:0] res_d;
 	logic carry_d;
 	add18 u_post (.en(ctrl.post_en),
-					.sub(cltr.post_sub),
+					.sub(ctrl.post_sub),
 					.a(x_prod),
 					.b(y_prod),
 					.res(res_d),
