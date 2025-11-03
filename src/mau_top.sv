@@ -1,7 +1,12 @@
+/*
+ * Copyright (c) 2024 Your Name
+ * SPDX-License-Identifier: Apache-2.0
+ */
+ 
 // Top-level Math Accelerator Unit (MAU) Module
 // Integrates RX, Decode, ALU, and TX stages
 
-// First, include the ALU control structure definition
+// ALU control structure definition
 typedef struct packed {
     // X lane
     logic       pre_x_en;    // 0:x0, 1:add
@@ -21,7 +26,7 @@ typedef struct packed {
     logic       post_sel;    // 0:b, 1:zero (skip)
 } alu_ctrl_t;
 
-module mau_top (
+module tt_um_mau_top (
     // Global signals
     input  logic       clk,        // System clock (TT clock)
     input  logic       rst_n,      // Active low reset (TT global reset)
@@ -155,66 +160,3 @@ module mau_top (
     );
 
 endmodule
-
-// ==============================================================================
-// ISSUES AND INCONSISTENCIES IDENTIFIED:
-// ==============================================================================
-//
-// 1. ALU_CTRL_T DEFINITION:
-//    - Problem: The typedef is defined in decode_module.sv but needed by ALU too
-//    - Solution: Moved to top file (could be in separate package file)
-//
-// 2. ALU MODULE SYNTAX ERRORS:
-//    - Line 105: Missing comma after "pre_res" parameter
-//    - Line 113: "detault" should be "default"
-//    - Line 60: Missing semicolon in ternary operator
-//
-// 3. SIGNAL WIDTH MISMATCH:
-//    - ALU outputs res_q[17:0] but should handle 18 bits properly
-//    - Carry handling seems correct
-//
-// 4. MISSING ACCUMULATOR FUNCTIONALITY:
-//    - Project mentions accumulator register but not implemented
-//    - ALU has result register but no accumulation mode
-//
-// 5. OPCODE CONFLICTS:
-//    - Multiple operations assigned to 0x00 in decode module
-//    - Need unique opcodes for: VADD2, VSUB2, DIFF2, DET2, DIST2, POLY, SCMULX
-//
-// 6. FLAGS NOT IMPLEMENTED:
-//    - Project mentions 4 bits for flags (accumulate_en, QNotation_en, X_en, Y_en)
-//    - Currently only using lower bits of opcode
-//
-// 7. OPERAND ROUTER ROUTING:
-//    - Currently using upper 4 bits of opcode for routing
-//    - May conflict with flag usage
-//
-// 8. TT I/O MAPPING:
-//    - uio pins need to be properly mapped:
-//      * uio[0] = spi_clk (input)
-//      * uio[1] = spi_w (input)
-//      * uio[2] = spi_r (input)
-//      * uio[3] = res_carry (output)
-//    - This needs bidirectional I/O configuration
-//
-// 9. TIMING CONSIDERATIONS:
-//    - No explicit pipeline registers between stages
-//    - All handshaking assumes single-cycle operations
-//    - May need adjustment based on synthesis results
-//
-// 10. RESET SYNCHRONIZATION:
-//     - All modules use async reset (negedge rst_n)
-//     - Good for TinyTapeout global reset
-//
-// ==============================================================================
-// RECOMMENDED FIXES:
-// ==============================================================================
-//
-// 1. Fix ALU module syntax errors (lines 60, 105, 113)
-// 2. Assign unique opcodes to all operations
-// 3. Implement flag decoding (upper 4 bits of opcode)
-// 4. Add accumulator functionality if needed
-// 5. Create testbench to verify handshaking
-// 6. Consider adding pipeline registers if timing fails
-//
-// ==============================================================================
