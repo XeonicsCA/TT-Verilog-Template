@@ -6,25 +6,8 @@
 // Top-level Math Accelerator Unit (MAU) Module
 // Integrates RX, Decode, ALU, and TX stages
 
-// ALU control structure definition
-typedef struct packed {
-    // X lane
-    logic       pre_x_en;    // 0:x0, 1:add
-    logic       pre_x_sub;   // 0:add, 1:sub
-    logic       mul_x_en;    // 0:m0,m1, 1:mul
-    logic [2:0] mul_x_sel;   // 0:x0, 1:x1, 2:square, 3:c_from_y1, 4:one (skip)
-
-    // Y lane
-    logic       pre_y_en;    // 0:y0, 1:add
-    logic       pre_y_sub;   // 0:add, 1:sub
-    logic       mul_y_en;    // 0:m0m1, 1:mul
-    logic [2:0] mul_y_sel;   // 0:y0, 1:y1, 2:square, 3:c_from_x1, 4:one (skip)
-
-    // Post adder
-    logic       post_en;     // 0:concat, 1:add
-    logic       post_sub;    // 0:add, 1:sub
-    logic       post_sel;    // 0:b, 1:zero (skip)
-} alu_ctrl_t;
+`timescale 1ns/1ps
+`default_nettype none
 
 module tt_um_mau_top (
     input  wire [7:0] ui_in,    // MOSI[7:0] - Instruction/Operand input
@@ -38,7 +21,10 @@ module tt_um_mau_top (
 );
 
     // setup bidirectional IO
-    assign uio_oe = 8'b00001000;
+    assign uio_oe       = 8'b0000_1000;
+    // drive unused bidir outputs to known values
+    assign uio_out[7:4] = 4'b0000;
+    assign uio_out[2:0] = 3'b000;
     
     // Internal interconnect signals
     
@@ -55,8 +41,9 @@ module tt_um_mau_top (
     logic [7:0] dec_x0;         // X lane operand 0
     logic [7:0] dec_x1;         // X lane operand 1
     logic [7:0] dec_y0;         // Y lane operand 0
-    logic [7:0] dec_y1;         // Y lane operand 1
-    alu_ctrl_t  alu_ctrl;       // ALU control signals
+    logic [7:0] dec_y1;         // Y lane operand 1    
+    alu_pkg::alu_ctrl_t  alu_ctrl;   // ALU control signals  
+
     
     // ALU to TX signals
     logic [17:0] alu_result;    // 18-bit result from ALU
@@ -158,6 +145,6 @@ module tt_um_mau_top (
     );
 
     // unused inputs to prevent warnings
-    wire _unused = &{uio_out[7:4], uio_out[2:0], ena, 1'b0};
+    wire _unused = &{ena, 1'b0};
 
 endmodule

@@ -1,3 +1,6 @@
+`timescale 1ns/1ps
+`default_nettype none
+
 // adds two 8 bit values together, 9 bit output
 // supports subtraction
 module pre_add8 (
@@ -50,20 +53,33 @@ module add18 (
 	output 	logic 			carry
 );
 	logic [18:0] tmp;
+	logic [8:0] a_8;
+	logic [8:0] b_8;
+	logic [18:0] a_18;
+	logic [18:0] b_18;
+
 	always_comb begin
 		// default values
 		tmp = '0;
 		res = '0;
 		carry = 1'b0;
+		a_8 = '0;
+		b_8 = '0;
+		a_18 = '0;
+		b_18 = '0;
 		
 		// if not enabled, concat lower 9 bits of a and b
 		if (!en) begin
-			res = {a[8:0], b[8:0]};
+			a_8  = a[8:0];
+			b_8  = b[8:0];
+			res = {a_8, b_8};
 			carry = 1'b0;				// set carry bit to 0
 		end
 		// if enabled, output add or sub
 		else begin
-			tmp = sub ? ({1'b0, a} - {1'b0, b}) : ({1'b0, a} + {1'b0, b});
+			a_18 = {1'b0, a};
+			b_18 = {1'b0, b};
+			tmp = sub ? (a_18 - b_18) : (a_18 + b_18);
 			res = tmp[17:0];
 			carry = tmp[18];
 		end
@@ -74,7 +90,7 @@ module alu_stage (
 	input	logic			clk, rst_n,
 	input	logic [7:0]		x0, x1,		// inputs from operand router
 	input	logic [7:0] 	y0, y1,
-	input 	alu_ctrl_t 		ctrl, 		// control from decode
+	input 	alu_pkg::alu_ctrl_t 		ctrl, 		// control from decode
 
 	// handshake logic with op decode/tx stage
 	input	logic			cmd_valid,	// tx command in is valid

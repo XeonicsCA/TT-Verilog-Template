@@ -37,6 +37,9 @@
 // 	logic		post_sel;		// 0:b, 1:zero (skip)
 // } alu_ctrl_t;
 
+`timescale 1ns/1ps
+`default_nettype none
+
 // takes in 8 bit op code from instruction and operands
 // outputs alu_ctrl_t containing all alu stage control signals
 // and routes operands to appropriate ALU lanes
@@ -53,7 +56,7 @@ module decode_stage (
 	
 	output	logic		alu_ready_out,     // Pass cmd_ready_in back to RX stage
 	output	logic		cmd_valid_out,     // Valid command to ALU (was decode_valid)
-	output	alu_ctrl_t	ctrl,          // Control signals to ALU
+	output	alu_pkg::alu_ctrl_t	ctrl,          // Control signals to ALU
 	output	logic [7:0]	x0,            // X lane operand 0 to ALU
 	output	logic [7:0]	x1,            // X lane operand 1 to ALU
 	output	logic [7:0]	y0,            // Y lane operand 0 to ALU
