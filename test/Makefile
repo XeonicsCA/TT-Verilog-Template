@@ -7,6 +7,14 @@ TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 PROJECT_SOURCES = alu_pkg.sv mau_top.sv rx_module.sv decode_module.sv alu_module.sv tx_module.sv
 
+# Unique run stamp
+TIMESTAMP ?= $(shell date +%Y%m%d_%H%M%S)
+
+# Ensure the per-test wave folder exists before sim starts
+sim: | $(WAVES_DIR)
+$(WAVES_DIR):
+	@mkdir -p "$(WAVES_DIR)"
+
 ifneq ($(GATES),yes)
 
 # RTL simulation:
@@ -33,12 +41,74 @@ endif
 # Allow sharing configuration between design and testbench via `include`:
 COMPILE_ARGS 		+= -I$(SRC_DIR)
 
-# Include the testbench sources:
-VERILOG_SOURCES += $(PWD)/tb.v
-TOPLEVEL = tb
+# tests
+# add additional src files as required
+.PHONY: test-rx test-decode test-alu test-tx test-top
 
-# MODULE is the basename of the Python test file
-MODULE = test
+test-rx:
+	$(MAKE) clean
+	$(MAKE) sim \
+		MODULE=test_rx \
+		TOPLEVEL=rx_tb \
+		VERILOG_SOURCES="./rx_module/rx_tb.sv ../src/rx_module.sv" \
+		PYTHONPATH=$(PWD)/rx_module \
+		WAVES_DIR=$(PWD)/rx_module/wave \
+		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
+		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/rx_module/wave/rx_module_$(TIMESTAMP).vcd\""'
+
+test-tx:
+	$(MAKE) clean
+	$(MAKE) sim \
+		MODULE=test_tx \
+		TOPLEVEL=tx_tb \
+		VERILOG_SOURCES="./tx_module/tx_tb.sv ../src/tx_module.sv" \
+		PYTHONPATH=$(PWD)/tx_module \
+		WAVES_DIR=$(PWD)/tx_module/wave \
+		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
+		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/tx_module/wave/tx_module_$(TIMESTAMP).vcd\""'
+
+test-alu:
+	$(MAKE) clean
+	$(MAKE) sim \
+		MODULE=test_alu \
+		TOPLEVEL=alu_tb \
+		VERILOG_SOURCES="../src/alu_pkg.sv ./alu_module/alu_tb.sv ../src/alu_module.sv" \
+		PYTHONPATH=$(PWD)/alu_module \
+		WAVES_DIR=$(PWD)/alu_module/wave \
+		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
+		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/alu_module/wave/alu_module_$(TIMESTAMP).vcd\""'
+
+test-decode:
+	$(MAKE) clean
+	$(MAKE) sim \
+		MODULE=test_decode \
+		TOPLEVEL=decode_tb \
+		VERILOG_SOURCES="../src/alu_pkg.sv ./decode_module/decode_tb.sv ../src/decode_module.sv" \
+		PYTHONPATH=$(PWD)/decode_module \
+		WAVES_DIR=$(PWD)/decode_module/wave \
+		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
+		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/decode_module/wave/decode_module_$(TIMESTAMP).vcd\""'
+
+
+test-top:
+	$(MAKE) clean
+	$(MAKE) sim \
+		MODULE=test_mau_top \
+		TOPLEVEL=mau_top_tb \
+		VERILOG_SOURCES="./mau_top/mau_top_tb.sv ../src/mau_top.sv" \
+		PYTHONPATH=$(PWD)/mau_top \
+		WAVES_DIR=$(PWD)/mau_top/wave \
+		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
+		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/mau_top/wave/mau_top_$(TIMESTAMP).vcd\""'
+
+# Phony target for cleaning up
+.PHONY: clean
+clean::
+	rm -rf sim_build* results.xml
+
+
+.PHONY: all
+all: test-rx test-decode test-alu test-tx test-top
 
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim

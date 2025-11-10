@@ -5,11 +5,7 @@
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = 	mau_top.sv \
-					rx_module.sv \
-					decode_module.sv \
-					alu_module.sv \
-					tx_module.sv
+PROJECT_SOURCES = alu_pkg.sv mau_top.sv rx_module.sv decode_module.sv alu_module.sv tx_module.sv
 
 ifneq ($(GATES),yes)
 
@@ -66,7 +62,7 @@ test-alu:
 	$(MAKE) sim \
 		MODULE=test_alu \
 		TOPLEVEL=alu_tb \
-		VERILOG_SOURCES="./alu_module/alu_tb.sv ../src/alu_module.sv" \
+		VERILOG_SOURCES="../src/alu_pkg.sv ./alu_module/alu_tb.sv ../src/alu_module.sv" \
 		PYTHONPATH=$(PWD)/alu_module \
 		WAVES_DIR=$(PWD)/alu_module/wave \
 		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/alu_module/wave/alu_module_$(TIMESTAMP).vcd\""'
@@ -76,10 +72,12 @@ test-decode:
 	$(MAKE) sim \
 		MODULE=test_decode \
 		TOPLEVEL=decode_tb \
-		VERILOG_SOURCES="./decode_module/decode_tb.sv ../src/decode_module.sv" \
+		VERILOG_SOURCES="../src/alu_pkg.sv ./decode_module/decode_tb.sv ../src/decode_module.sv" \
 		PYTHONPATH=$(PWD)/decode_module \
 		WAVES_DIR=$(PWD)/decode_module/wave \
-		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/decode_module/wave/decode_module_$(TIMESTAMP).vcd\""'
+		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/decode_module/wave/decode_module_$(TIMESTAMP).vcd\""' \
+		VVP="env -u LD_LIBRARY_PATH -u LD_PRELOAD /usr/bin/vvp" \
+		COCOTB_PYTHON=$(shell which python)
 
 test-top:
 	$(MAKE) clean
