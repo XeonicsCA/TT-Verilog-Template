@@ -1,35 +1,37 @@
 `timescale 1ns/1ps
 `default_nettype none
 
-// adds two 8 bit values together, 9 bit output
+// 4-BIT VERSION OF ALU_MODULE
+
+// adds two 4 bit values together, 5 bit output
 // supports subtraction
-module pre_add8 (
+module pre_add4 (
 	input 	logic			en,
 	input 	logic			sub,		// 0 to add, 1 to sub
-	input 	logic [7:0]		in0, in1,	// 8 bit inputs
-	output 	logic [8:0]		out9		// 9 bit output (going to multiplier)
+	input 	logic [3:0]		in0, in1,	// 4 bit inputs
+	output 	logic [4:0]		out5		// 5 bit output (going to multiplier)
 );
-	// concat in0 and in1 with 0 in MSB for 9 bit values
-	logic [8:0] a, b;
+	// concat in0 and in1 with 0 in MSB for 5 bit inputs
+	logic [4:0] a, b;
 	assign a = {1'b0, in0};
 	assign b = {1'b0, in1};
 	always_comb begin
 		// if not enabled, pass through in0
 		if (!en) begin
-			out9 = a;
+			out5 = a;
 		end
 		// if enabled, output add or sub
 		else begin
-			out9 = sub ? (a-b) : (a+b);
+			out5 = sub ? (a-b) : (a+b);
 		end
 	end
 endmodule
 
-// multiplies two 9 bit values together, 18 bit output
-module mul9x9 (
+// multiplies two 5 bit values together, 10 bit output
+module mul5x5 (
 	input 	logic			en,
-	input 	logic [8:0]		m0, m1,		// 9 bit inputs
-	output 	logic [17:0]	p 			// 18 bit outputs
+	input 	logic [4:0]		m0, m1,		// 5 bit inputs
+	output 	logic [9:0]	p 			// 10 bit outputs
 );
 	always_comb begin
 		// if not enabled, pass through concat m0 and m1
@@ -43,53 +45,53 @@ module mul9x9 (
 	end
 endmodule
 
-// adds two 18 bit values together, 18 bit output with carry signal
+// adds two 10 bit values together, 10 bit output with carry signal
 // supports sub
-module add18 (
+module add10 (
 	input 	logic			en,
 	input 	logic			sub,	// 0 to add, 1 to sub
-	input 	logic [17:0] 	a, b,
-	output 	logic [17:0] 	res,
+	input 	logic [9:0] 	a, b,
+	output 	logic [9:0] 	res,
 	output 	logic 			carry
 );
-	logic [18:0] tmp;
-	logic [8:0] a_8;
-	logic [8:0] b_8;
-	logic [18:0] a_18;
-	logic [18:0] b_18;
+	logic [10:0] tmp;
+	logic [4:0] a_5;
+	logic [4:0] b_5;
+	logic [10:0] a_11;
+	logic [10:0] b_11;
 
 	always_comb begin
 		// default values
 		tmp = '0;
 		res = '0;
 		carry = 1'b0;
-		a_8 = '0;
-		b_8 = '0;
-		a_18 = '0;
-		b_18 = '0;
+		a_5 = '0;
+		b_5 = '0;
+		a_11 = '0;
+		b_11 = '0;
 		
-		// if not enabled, concat lower 9 bits of a and b
+		// if not enabled, concat lower 5 bits of a and b
 		if (!en) begin
-			a_8  = a[8:0];
-			b_8  = b[8:0];
-			res = {a_8, b_8};
+			a_5 = a[4:0];
+			b_5 = b[4:0];
+			res = {a_5, b_5};
 			carry = 1'b0;				// set carry bit to 0
 		end
 		// if enabled, output add or sub
 		else begin
-			a_18 = {1'b0, a};
-			b_18 = {1'b0, b};
-			tmp = sub ? (a_18 - b_18) : (a_18 + b_18);
-			res = tmp[17:0];
-			carry = tmp[18];
+			a_11 = {1'b0, a};
+			b_11 = {1'b0, b};
+			tmp = sub ? (a_11 - b_11) : (a_11 + b_11);
+			res = tmp[9:0];
+			carry = tmp[10];
 		end
 	end
 endmodule
 
-module alu_stage (
+module alu_stage_4b (
 	input	logic			clk, rst_n,
-	input	logic [7:0]		x0, x1,		// inputs from operand router
-	input	logic [7:0] 	y0, y1,
+	input	logic [3:0]		x0, x1,		// inputs from operand router
+	input	logic [3:0] 	y0, y1,
 	input 	alu_pkg::alu_ctrl_t 		ctrl, 		// control from decode
 
 	// handshake logic with op decode/tx stage
@@ -98,7 +100,7 @@ module alu_stage (
 	output	logic			res_valid,	// alu result out is valid
 	input	logic			res_ready,	// rx is ready for a result
 
-	output	logic [17:0]	res_q,
+	output	logic [9:0]	res_q,
 	output	logic			carry_q
 );
 	// single-cycle, consumes when both sides ready
@@ -106,56 +108,56 @@ module alu_stage (
 	logic fire = cmd_valid & cmd_ready;
 
 	// preadders
-	logic [8:0] x_pre, y_pre;
-	pre_add8 u_px ( .en(ctrl.pre_x_en),
+	logic [4:0] x_pre, y_pre;
+	pre_add4 u_px ( .en(ctrl.pre_x_en),
 					.sub(ctrl.pre_x_sub),
 					.in0(x0),
 					.in1(x1),
-					.out9(x_pre));
-	pre_add8 u_py ( .en(ctrl.pre_y_en),
+					.out5(x_pre));
+	pre_add4 u_py ( .en(ctrl.pre_y_en),
 					.sub(ctrl.pre_y_sub),
 					.in0(y0),
 					.in1(y1),
-					.out9(y_pre));
+					.out5(y_pre));
 
 	// mul input select
 	// takes in select, both inputs, and c from other lane
-	// returns 9 bit value to be fed into m1
-	function automatic logic [8:0] sel_mul_in (
+	// returns 5 bit value to be fed into m1
+	function automatic logic [4:0] sel_mul_in (
 		input logic [2:0] sel,
-		input logic [8:0] in0, in1, pre_res,
-		input logic [7:0] c_other
+		input logic [4:0] in0, in1, pre_res,
+		input logic [3:0] c_other
 	);
 		case (sel)
 			3'd0 : sel_mul_in = in0;
 			3'd1 : sel_mul_in = in1;
 			3'd2 : sel_mul_in = pre_res;
 			3'd3 : sel_mul_in = {1'b0, c_other};
-			3'd4 : sel_mul_in = 9'b1;
-			default : sel_mul_in = 9'd0;
+			3'd4 : sel_mul_in = 5'b1;
+			default : sel_mul_in = 5'd0;
 		endcase
 	endfunction
 
-	logic [8:0] x_m0 = x_pre;
-	logic [8:0] x_m1 = sel_mul_in(ctrl.mul_x_sel, {1'b0, x0}, {1'b0, x1}, x_pre, y1);
-	logic [8:0] y_m0 = y_pre;
-	logic [8:0] y_m1 = sel_mul_in(ctrl.mul_y_sel, {1'b0, y0}, {1'b0, y1}, y_pre, x1);
+	logic [4:0] x_m0 = x_pre;
+	logic [4:0] x_m1 = sel_mul_in(ctrl.mul_x_sel, {1'b0, x0}, {1'b0, x1}, x_pre, y1);
+	logic [4:0] y_m0 = y_pre;
+	logic [4:0] y_m1 = sel_mul_in(ctrl.mul_y_sel, {1'b0, y0}, {1'b0, y1}, y_pre, x1);
 
 	// muls
-	logic [17:0] x_prod, y_prod;
-	mul9x9 u_mx (.en(ctrl.mul_x_en),
+	logic [9:0] x_prod, y_prod;
+	mul5x5 u_mx (.en(ctrl.mul_x_en),
 					.m0(x_m0),
 					.m1(x_m1),
 					.p(x_prod));
-	mul9x9 u_my (.en(ctrl.mul_y_en),
+	mul5x5 u_my (.en(ctrl.mul_y_en),
 					.m0(y_m0),
 					.m1(y_m1),
 					.p(y_prod));
 
-	// post addercltr
-	logic [17:0] res_d;
+	// post adder ctlr
+	logic [9:0] res_d;
 	logic carry_d;
-	add18 u_post (.en(ctrl.post_en),
+	add10 u_post (.en(ctrl.post_en),
 					.sub(ctrl.post_sub),
 					.a(x_prod),
 					.b(y_prod),

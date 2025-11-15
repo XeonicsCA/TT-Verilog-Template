@@ -2,10 +2,18 @@
 # See https://docs.cocotb.org/en/stable/quickstart.html for more info
 
 # defaults
-SIM ?= icarus
+SIM ?= verilator
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 PROJECT_SOURCES = alu_pkg.sv mau_top.sv rx_module.sv decode_module.sv alu_module.sv tx_module.sv
+
+# Auto-enable Verilator waves unless explicitly disabled
+VERILATOR_WAVES ?= 1
+ifeq ($(SIM),verilator)
+ifeq ($(VERILATOR_WAVES),1)
+EXTRA_ARGS += --timing --trace --trace-structs # --trace-fst
+endif
+endif
 
 # Unique run stamp
 TIMESTAMP ?= $(shell date +%Y%m%d_%H%M%S)
@@ -67,16 +75,16 @@ test-tx:
 		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
 		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/tx_module/wave/tx_module_$(TIMESTAMP).vcd\""'
 
-test-alu:
+test-alu-4b:
 	$(MAKE) clean
 	$(MAKE) sim \
-		MODULE=test_alu \
-		TOPLEVEL=alu_tb \
-		VERILOG_SOURCES="../src/alu_pkg.sv ./alu_module/alu_tb.sv ../src/alu_module.sv" \
+		MODULE=test_alu_4b \
+		TOPLEVEL=alu_tb_4b \
+		VERILOG_SOURCES="../src/alu_pkg.sv ./alu_module/alu_tb_4b.sv ../src/alu_module_4b.sv" \
 		PYTHONPATH=$(PWD)/alu_module \
 		WAVES_DIR=$(PWD)/alu_module/wave \
 		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
-		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/alu_module/wave/alu_module_$(TIMESTAMP).vcd\""'
+		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/alu_module/wave/alu_module_4b$(TIMESTAMP).vcd\""'
 
 test-decode:
 	$(MAKE) clean
@@ -88,6 +96,17 @@ test-decode:
 		WAVES_DIR=$(PWD)/decode_module/wave \
 		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
 		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/decode_module/wave/decode_module_$(TIMESTAMP).vcd\""'
+
+test-decode-4b:
+	$(MAKE) clean
+	$(MAKE) sim \
+		MODULE=test_decode_4b \
+		TOPLEVEL=decode_tb_4b \
+		VERILOG_SOURCES="../src/alu_pkg.sv ./decode_module/decode_tb_4b.sv ../src/decode_module_4b.sv" \
+		PYTHONPATH=$(PWD)/decode_module \
+		WAVES_DIR=$(PWD)/decode_module/wave \
+		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
+		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/decode_module/wave/decode_module_4b_$(TIMESTAMP).vcd\""'
 
 
 test-top:
