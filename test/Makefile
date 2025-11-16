@@ -51,7 +51,7 @@ COMPILE_ARGS 		+= -I$(SRC_DIR)
 
 # tests
 # add additional src files as required
-.PHONY: test-rx test-decode test-alu test-tx test-top
+.PHONY: test-rx test-rx-4b test-decode test-decode-4b test-alu test-tx test-tx-4b test-top
 
 test-rx:
 	$(MAKE) clean
@@ -64,6 +64,17 @@ test-rx:
 		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
 		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/rx_module/wave/rx_module_$(TIMESTAMP).vcd\""'
 
+test-rx-4b:
+	$(MAKE) clean
+	$(MAKE) sim \
+		MODULE=test_rx_4b \
+		TOPLEVEL=rx_tb_4b \
+		VERILOG_SOURCES="./rx_module/rx_tb_4b.sv ../src/rx_module_4b.sv" \
+		PYTHONPATH=$(PWD)/rx_module \
+		WAVES_DIR=$(PWD)/rx_module/wave \
+		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
+		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/rx_module/wave/rx_module_4b_$(TIMESTAMP).vcd\""'
+
 test-tx:
 	$(MAKE) clean
 	$(MAKE) sim \
@@ -74,6 +85,17 @@ test-tx:
 		WAVES_DIR=$(PWD)/tx_module/wave \
 		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
 		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/tx_module/wave/tx_module_$(TIMESTAMP).vcd\""'
+
+test-tx-4b:
+	$(MAKE) clean
+	$(MAKE) sim \
+		MODULE=test_tx_4b \
+		TOPLEVEL=tx_tb_4b \
+		VERILOG_SOURCES="./tx_module/tx_tb_4b.sv ../src/tx_module_4b.sv" \
+		PYTHONPATH=$(PWD)/tx_module \
+		WAVES_DIR=$(PWD)/tx_module/wave \
+		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
+		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/tx_module/wave/tx_module_4b_$(TIMESTAMP).vcd\""'
 
 test-alu-4b:
 	$(MAKE) clean
@@ -107,7 +129,6 @@ test-decode-4b:
 		WAVES_DIR=$(PWD)/decode_module/wave \
 		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
 		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/decode_module/wave/decode_module_4b_$(TIMESTAMP).vcd\""'
-
 
 test-top:
 	$(MAKE) clean
