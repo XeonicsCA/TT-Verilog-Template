@@ -51,7 +51,7 @@ COMPILE_ARGS 		+= -I$(SRC_DIR)
 
 # tests
 # add additional src files as required
-.PHONY: test-rx test-rx-4b test-decode test-decode-4b test-alu test-tx test-tx-4b test-top
+.PHONY: test-rx test-rx-4b test-decode test-decode-4b test-alu test-alu-4b test-tx test-tx-4b test-top test-top-4b
 
 test-rx:
 	$(MAKE) clean

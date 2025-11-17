@@ -15,8 +15,7 @@
 #
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles
-from cocotb.triggers import RisingEdge
+from cocotb.triggers import RisingEdge, ClockCycles
 from cocotb.result import TestFailure
 
 CLK_NS = 10
