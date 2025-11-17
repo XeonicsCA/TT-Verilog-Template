@@ -12,10 +12,12 @@ module pre_add4 (
 	output 	logic [4:0]		out5		// 5 bit output (going to multiplier)
 );
 	// concat in0 and in1 with 0 in MSB for 5 bit inputs
-	logic [4:0] a, b;
-	assign a = {1'b0, in0};
-	assign b = {1'b0, in1};
+	logic [4:0] a;
+  	logic [4:0] b;
 	always_comb begin
+		// concat inputs to 5 bits
+		a = {1'b0, in0};
+		b = {1'b0, in1};
 		// if not enabled, pass through in0
 		if (!en) begin
 			out5 = a;
@@ -105,7 +107,8 @@ module alu_stage_4b (
 );
 	// single-cycle, consumes when both sides ready
 	// determine when to perform a new command
-	logic fire = cmd_valid & cmd_ready;
+	logic fire;
+	assign fire = cmd_valid & cmd_ready;
 
 	// preadders
 	logic [4:0] x_pre, y_pre;
@@ -138,10 +141,12 @@ module alu_stage_4b (
 		endcase
 	endfunction
 
-	logic [4:0] x_m0 = x_pre;
-	logic [4:0] x_m1 = sel_mul_in(ctrl.mul_x_sel, {1'b0, x0}, {1'b0, x1}, x_pre, y1);
-	logic [4:0] y_m0 = y_pre;
-	logic [4:0] y_m1 = sel_mul_in(ctrl.mul_y_sel, {1'b0, y0}, {1'b0, y1}, y_pre, x1);
+	logic [4:0] x_m0, x_m1, y_m0, y_m1;
+
+	assign x_m0 = x_pre;
+	assign x_m1 = sel_mul_in(ctrl.mul_x_sel, {1'b0, x0}, {1'b0, x1}, x_pre, y1);
+	assign y_m0 = y_pre;
+	assign y_m1 = sel_mul_in(ctrl.mul_y_sel, {1'b0, y0}, {1'b0, y1}, y_pre, x1);
 
 	// muls
 	logic [9:0] x_prod, y_prod;
@@ -154,7 +159,7 @@ module alu_stage_4b (
 					.m1(y_m1),
 					.p(y_prod));
 
-	// post adder ctlr
+	// post adder ctrl
 	logic [9:0] res_d;
 	logic carry_d;
 	add10 u_post (.en(ctrl.post_en),
