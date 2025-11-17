@@ -2,17 +2,17 @@
 #
 # ALU 4-bit unit tests for alu_stage_4b via alu_tb_4b wrapper.
 #
-# What we cover:
+# Tests:
 #   - VADD2 (opcode 0x06): lane-wise add, result concatenation (lower 5b per lane)
 #   - DOT2  (opcode 0x01): (x0*x1) + (y0*y1) using lane multipliers and post add
 #   - Backpressure behavior on the result channel
 #
-# These tests drive control bits directly (alu_ctrl_t), not opcodes.
+# These tests drive control bits directly (alu_ctrl_t), not opcodes
 # Mapping to the opcode table:
 #   VADD2: pre_x_en=1 (add), pre_y_en=1 (add), mul_*_en=1 with sel=ONE (x*1, y*1 as pass-through),
 #          post_en=0 (concat lanes). Expected: {pre_x[4:0], pre_y[4:0]}.
 #   DOT2:  pre_*_en=0 (pass in0), mul_*_en=1, mul_*_sel=1 (select in1), post_en=1 (add lanes).
-#
+
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, ClockCycles
@@ -91,11 +91,11 @@ async def test_vadd2_concat(dut):
         f"cmd_ready={int(dut.cmd_ready.value)} "
         f"res_valid={int(dut.res_valid.value)}"
     )
-    # If your instance name is u_alu (it is in alu_tb_4b.sv), you can also peek 'full':
+    # Try to peek at 'res_full' (not currently being used)
     try:
-        dut._log.info(f"after reset: u_alu.full={int(dut.u_alu.full.value)}")
+        dut._log.info(f"after reset: u_alu.res_full={int(dut.u_alu.full.value)}")
     except AttributeError:
-        dut._log.info("u_alu.full not visible from cocotb (check instance name)")
+        dut._log.info("u_alu.res_full not visible from cocotb (check instance name)")
 
     # Operands (4-bit)
     x0, x1, y0, y1 = 0x3, 0x4, 0x5, 0x6
@@ -108,7 +108,7 @@ async def test_vadd2_concat(dut):
     # Use multiplier as pass-through by multiplying by 1
     dut.mul_x_en.value = 1; dut.mul_x_sel.value = 4
     dut.mul_y_en.value = 1; dut.mul_y_sel.value = 4
-    # Post: concat
+    # Post concat
     dut.post_en.value  = 0; dut.post_sub.value = 0
 
     # Handshake
@@ -147,7 +147,7 @@ async def test_dot2_post_add(dut):
     dut.mul_x_en.value = 1; dut.mul_x_sel.value = 1  # select x1
     dut.mul_y_en.value = 1; dut.mul_y_sel.value = 1  # select y1
 
-    # Post: add lanes
+    # Post add lanes
     dut.post_en.value  = 1; dut.post_sub.value = 0
 
     dut.res_ready.value = 1
@@ -159,7 +159,6 @@ async def test_dot2_post_add(dut):
     got = int(dut.res_q.value) & 0x3FF
     assert got == exp, f"DOT2 expected {exp} got {got}"
     assert int(dut.res_valid.value) == 1, "Result should be valid"
-    # carry_q may be 0 for this small vector; not asserted here
 
 @cocotb.test()
 async def test_result_backpressure(dut):
@@ -167,7 +166,7 @@ async def test_result_backpressure(dut):
     cocotb.start_soon(Clock(dut.clk, CLK_NS, units="ns").start())
     await reset(dut)
 
-    # Simple configuration: pass-through via multiply-by-1, concat
+    # Pass-through via multiply-by-1, concat
     dut.pre_x_en.value = 1; dut.pre_x_sub.value = 0; dut.mul_x_en.value = 1; dut.mul_x_sel.value = 4
     dut.pre_y_en.value = 1; dut.pre_y_sub.value = 0; dut.mul_y_en.value = 1; dut.mul_y_sel.value = 4
     dut.post_en.value  = 0; dut.post_sub.value = 0
@@ -175,19 +174,28 @@ async def test_result_backpressure(dut):
     dut.x0.value = 0x1; dut.x1.value = 0x1
     dut.y0.value = 0x2; dut.y1.value = 0x2
 
-    # Backpressure: not ready to take result
+    # Backpressure, not ready to take result
     dut.res_ready.value = 0
     dut.cmd_valid.value = 1
     while int(dut.cmd_ready.value) == 0: # wait until ALU accepts handshake
         await ClockCycles(dut.clk, 1)
     await ClockCycles(dut.clk, 1) # advance one cycle for registered result to appear
     dut.cmd_valid.value = 0 # drop CMD valid, ALU has value latched
+    # await ClockCycles(dut.clk, 1) # wait one cycle for values to settle
 
     assert int(dut.res_valid.value) == 1, "Result must be held valid under backpressure"
     assert int(dut.cmd_ready.value) == 0, "cmd_ready should be low while holding a result"
 
-    # Release backpressure; result should be consumed and ready returns high
+    # Release backpressure, result should be consumed and ready returns high
     dut.res_ready.value = 1
+    dut._log.info(
+        f"before consume: res_valid={int(dut.res_valid.value)} "
+        f"dbg_res_valid={int(dut.u_alu.dbg_res_valid.value)}"
+    )
     await ClockCycles(dut.clk, 1)
+    dut._log.info(
+        f"after consume: res_valid={int(dut.res_valid.value)} "
+        f"dbg_res_valid={int(dut.u_alu.dbg_res_valid.value)}"
+    )
     assert int(dut.res_valid.value) == 0, "Result should be consumed when res_ready goes high"
     assert int(dut.cmd_ready.value) == 1, "ALU should become ready again"

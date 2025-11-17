@@ -72,7 +72,7 @@ async def test_tx_happy_path(dut):
     Nibble 3: 0x0 (Reserved)
     Nibble 4: 0x0 (Reserved)
     """
-    cocotb.start_soon(Clock(dut.clk, CLK_NS, unit="ns").start())
+    cocotb.start_soon(Clock(dut.clk, CLK_NS, units="ns").start())
     await reset(dut)
     
     # Check that res_ready is high after reset
@@ -117,7 +117,7 @@ async def test_tx_happy_path(dut):
 @cocotb.test()
 async def test_tx_no_spi_r(dut):
     """Verify TX module does not transmit if spi_r is low."""
-    cocotb.start_soon(Clock(dut.clk, CLK_NS, unit="ns").start())
+    cocotb.start_soon(Clock(dut.clk, CLK_NS, units="ns").start())
     await reset(dut)
     
     await send_result_to_dut(dut, 0x123, 0)
@@ -133,7 +133,7 @@ async def test_tx_no_spi_r(dut):
 @cocotb.test()
 async def test_tx_alu_backpressure(dut):
     """Verify res_ready signal correctly applies backpressure."""
-    cocotb.start_soon(Clock(dut.clk, CLK_NS, unit="ns").start())
+    cocotb.start_soon(Clock(dut.clk, CLK_NS, units="ns").start())
     await reset(dut)
     
     # 1. Send first result. res_ready should be 1.
@@ -201,7 +201,7 @@ async def test_tx_alu_backpressure(dut):
 @cocotb.test()
 async def test_tx_reset_during_tx(dut):
     """Verify reset clears state during an active transmission."""
-    cocotb.start_soon(Clock(dut.clk, CLK_NS, unit="ns").start())
+    cocotb.start_soon(Clock(dut.clk, CLK_NS, units="ns").start())
     await reset(dut)
     
     # Use a 10-bit value (0x2BC = 0b10 1011 1100)
@@ -233,7 +233,7 @@ async def test_tx_reset_during_tx(dut):
 @cocotb.test()
 async def test_tx_carry_out(dut):
     """Verify carry_out just passes through carry_in."""
-    cocotb.start_soon(Clock(dut.clk, CLK_NS, unit="ns").start())
+    cocotb.start_soon(Clock(dut.clk, CLK_NS, units="ns").start())
     await reset(dut)
 
     # Test carry = 1

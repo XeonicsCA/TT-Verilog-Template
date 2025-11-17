@@ -2,10 +2,9 @@
 `default_nettype none
 
 // 4-bit ALU unit test wrapper
-// - Drives alu_stage_4b with a cocotb-friendly pinout.
-// - Breaks out control fields for easy driving from Python and repacks into alu_ctrl_t.
-// - Generates a VCD when compiled with Icarus via -DVCD_PATH=...
-//   (under Verilator, the filename is controlled by TRACEFILE in the Makefile).
+// - Drives alu_stage_4b
+// - Fans out control fields for easy driving from Python and repacks into alu_ctrl_t
+
 
 module alu_tb_4b;
 
@@ -18,8 +17,8 @@ module alu_tb_4b;
     logic [3:0] y1;
 
     logic cmd_valid; // TB -> DUT: command is valid this cycle
-    logic cmd_ready; // output, DUT -> TB: ready to accept a command
-    logic res_valid; // output, DUT -> TB: result is valid this cycle
+    logic cmd_ready; // DUT -> TB: ALU ready to accept a command
+    logic res_valid; // DUT -> TB: ALU result is valid this cycle
     logic res_ready; // TB -> DUT: consumer is ready for result
 
     // using "verilator public_flat_rw" for internal inputs probing
