@@ -12,12 +12,10 @@ module pre_add4 (
 	output 	logic [4:0]		out5		// 5 bit output (going to multiplier)
 );
 	// concat in0 and in1 with 0 in MSB for 5 bit inputs
-	logic [4:0] a;
-  	logic [4:0] b;
+	logic [4:0] a, b;
+	assign a = {1'b0, in0};
+	assign b = {1'b0, in1};
 	always_comb begin
-		// concat inputs to 5 bits
-		a = {1'b0, in0};
-		b = {1'b0, in1};
 		// if not enabled, pass through in0
 		if (!en) begin
 			out5 = a;
@@ -102,7 +100,7 @@ module alu_stage_4b (
 	output	logic			res_valid,	// alu result out is valid
 	input	logic			res_ready,	// tx is ready for a result
 
-	output	logic [9:0]	res_q,
+	output	logic [9:0]		res_q,
 	output	logic			carry_q
 );
 	// single-cycle, consumes when both sides ready
@@ -169,81 +167,55 @@ module alu_stage_4b (
 					.res(res_d),
 					.carry(carry_d));
 
-	// register result and ready/valid logic
-	// logic res_full;	// full when result register holds a valid unconsumed result
+	// --------------------------------------------------------------------
+	// Register result and ready/valid logic
+	// --------------------------------------------------------------------
+	// Internal registered valid flag
+	logic res_valid_q;
 
-	// assign cmd_ready = ~res_full || (res_valid && res_ready); // ready for command if not full or completed previous operation successfully (rx ready to receive and result is valid)
-	// assign cmd_ready = ~res_valid || res_ready;
-	// always_ff @(posedge clk or negedge rst_n) begin
-	// 	// reset
-	// 	if (!rst_n) begin
-	// 		res_q		<= '0;
-	// 		carry_q		<= 1'b0;
-	// 		res_valid 	<= 1'b0;
-	// 		// res_full	<= 1'b0;
-	// 	end
-	// 	// normal behavior
-	// 	else begin
-	// 		// accepting new command, latch previous, set full, and set result valid
-	// 		if (cmd_valid && cmd_ready) begin
-	// 			res_q 		<= res_d;
-	// 			carry_q 	<= carry_d;
-	// 			res_valid 	<= 1'b1;
-	// 			// res_full 	<= 1'b1;
-	// 		end
-	// 		// consume existing result if result is in register and tx is ready
-	// 		if (res_valid && res_ready) begin
-	// 			res_valid 	<= 1'b0;
-	// 			// res_full 	<= 1'b0;
-	// 		end
-	// 	end
-	// end
+	// Handshake: stage is ready when it is not holding a result,
+	// or when the result will be consumed this cycle.
+	assign cmd_ready = ~res_valid_q || res_ready;
+
+	// Drive port from internal flop
+	assign res_valid = res_valid_q;
+
+	// Handshake condition for consumption
+	logic consume /* verilator public_flat_rw */;
+	assign consume = res_valid_q && res_ready;
+
+	// Result / carry registers and valid flop
+	always_ff @(posedge clk or negedge rst_n) begin
+		if (!rst_n) begin
+			res_q       <= '0;
+			carry_q     <= 1'b0;
+			res_valid_q <= 1'b0;
+		end else begin
+			// Handle both producing and consuming
+			if (fire) begin
+				// Producing a new result (possibly also consuming old one)
+				res_q       <= res_d;
+				carry_q     <= carry_d;
+				res_valid_q <= 1'b1;
+			end else if (consume) begin
+				// Only consuming (no new result)
+				res_valid_q <= 1'b0;
+			end
+			// else: hold state
+		end
+	end
 
 	// --------------------------------------------------------------------
-    // Register result and ready/valid logic
-    // --------------------------------------------------------------------
-    // Internal registered valid flag
-    logic res_valid_q;
+	// Debug: mirror internal valid for cocotb visibility
+	// --------------------------------------------------------------------
+	logic dbg_res_valid /* verilator public_flat_rw */;
 
-    // Handshake: stage is ready when it is not holding a result,
-    // or when the result will be consumed this cycle.
-    assign cmd_ready = ~res_valid_q || res_ready;
+	always_ff @(posedge clk or negedge rst_n) begin
+		if (!rst_n) begin
+			dbg_res_valid <= 1'b0;
+		end else begin
+			dbg_res_valid <= res_valid_q;
+		end
+	end
 
-    // Drive port from internal flop
-    assign res_valid = res_valid_q;
-
-    // Result / carry registers and valid flop
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            res_q       <= '0;
-            carry_q     <= 1'b0;
-            res_valid_q <= 1'b0;
-        end else begin
-            // 1) If we are currently holding a result and the consumer is ready,
-            //    drop this result.
-            if (res_valid_q && res_ready) begin
-                res_valid_q <= 1'b0;
-            end
-            // 2) Else, if a new command is handshaking, capture it.
-            else if (cmd_valid && cmd_ready) begin
-                res_q       <= res_d;
-                carry_q     <= carry_d;
-                res_valid_q <= 1'b1;
-            end
-            // 3) Else: hold previous state (implicit)
-        end
-    end
-
-    // --------------------------------------------------------------------
-    // Debug: mirror internal valid
-    // --------------------------------------------------------------------
-    logic dbg_res_valid /* verilator public_flat_rw */;
-
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            dbg_res_valid <= 1'b0;
-        end else begin
-            dbg_res_valid <= res_valid_q;
-        end
-    end
 endmodule

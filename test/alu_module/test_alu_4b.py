@@ -16,7 +16,6 @@
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, ClockCycles
-from cocotb.result import TestFailure
 
 CLK_NS = 10
 
@@ -61,7 +60,7 @@ async def issue_and_wait(dut, max_cycles=20):
         if cmd_v and cmd_r:
             break
     else:
-        raise TestFailure("cmd_ready never went high while cmd_valid asserted")
+        raise AssertionError("cmd_ready never went high while cmd_valid asserted")
 
     # Drop valid after handshake
     dut.cmd_valid.value = 0
@@ -74,7 +73,7 @@ async def issue_and_wait(dut, max_cycles=20):
         if res_v:
             return
 
-    raise TestFailure(
+    raise AssertionError(
         f"res_valid never went high within {max_cycles} cycles, "
         f"res_valid={int(dut.res_valid.value)}, cmd_ready={int(dut.cmd_ready.value)}"
     )
@@ -177,25 +176,34 @@ async def test_result_backpressure(dut):
     # Backpressure, not ready to take result
     dut.res_ready.value = 0
     dut.cmd_valid.value = 1
-    while int(dut.cmd_ready.value) == 0: # wait until ALU accepts handshake
-        await ClockCycles(dut.clk, 1)
-    await ClockCycles(dut.clk, 1) # advance one cycle for registered result to appear
-    dut.cmd_valid.value = 0 # drop CMD valid, ALU has value latched
-    # await ClockCycles(dut.clk, 1) # wait one cycle for values to settle
 
+    # Wait for handshake (cmd_valid & cmd_ready both high)
+    while int(dut.cmd_ready.value) == 0:
+        await RisingEdge(dut.clk)
+
+    # On the clock edge where handshake occurs, result is latched
+    await RisingEdge(dut.clk)
+    dut.cmd_valid.value = 0  # Drop cmd_valid after handshake
+
+    # Now check that result is valid and ready is low (backpressure working)
+    await RisingEdge(dut.clk)  # Wait one more cycle for signals to stabilize
     assert int(dut.res_valid.value) == 1, "Result must be held valid under backpressure"
     assert int(dut.cmd_ready.value) == 0, "cmd_ready should be low while holding a result"
 
+    # Add debug - check if signals are what we expect
+    await RisingEdge(dut.clk)  # Wait for the edge where consumption should happen
+    dut._log.info(
+        f"DEBUG at 150ns: cmd_valid={int(dut.cmd_valid.value)} "
+        f"cmd_ready={int(dut.cmd_ready.value)} "
+        f"res_valid={int(dut.res_valid.value)} "
+        f"res_ready={int(dut.res_ready.value)} "
+        f"fire={int(dut.u_alu.fire.value)} "
+        f"consume={int(dut.u_alu.consume.value)}"
+    )
+
     # Release backpressure, result should be consumed and ready returns high
     dut.res_ready.value = 1
-    dut._log.info(
-        f"before consume: res_valid={int(dut.res_valid.value)} "
-        f"dbg_res_valid={int(dut.u_alu.dbg_res_valid.value)}"
-    )
-    await ClockCycles(dut.clk, 1)
-    dut._log.info(
-        f"after consume: res_valid={int(dut.res_valid.value)} "
-        f"dbg_res_valid={int(dut.u_alu.dbg_res_valid.value)}"
-    )
+    await ClockCycles(dut.clk, 2)  # Wait 2 cycles: 1 for signal propagation, 1 for hardware processing
+    
     assert int(dut.res_valid.value) == 0, "Result should be consumed when res_ready goes high"
     assert int(dut.cmd_ready.value) == 1, "ALU should become ready again"
