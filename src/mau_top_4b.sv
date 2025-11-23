@@ -12,7 +12,7 @@
 `timescale 1ns/1ps
 `default_nettype none
 
-module tt_um_mau_top (
+module tt_um_mau_top_4b (
     input  wire [7:0] ui_in,    // MOSI[7:0] - Instruction/Operand input
     output wire [7:0] uo_out,   // MISO[7:0] - Result output
     input  wire [7:0] uio_in,   // IOs: Input path, SPI clock (uio_in[0]), SPI write enable (uio_in[1]), SPI read enable (uio_in[2])

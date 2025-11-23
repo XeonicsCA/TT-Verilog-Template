@@ -141,6 +141,17 @@ test-top:
 		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
 		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/mau_top/wave/mau_top_$(TIMESTAMP).vcd\""'
 
+test-top-4b:
+	$(MAKE) clean
+	$(MAKE) sim \
+		MODULE=test_mau_top_4b \
+		TOPLEVEL=mau_top_tb_4b \
+		VERILOG_SOURCES="../src/alu_pkg.sv ../src/rx_module_4b.sv ../src/decode_module_4b.sv ../src/alu_module_4b.sv ../src/tx_module_4b.sv ./mau_top/mau_top_tb_4b.sv ../src/mau_top_4b.sv"\
+		PYTHONPATH=$(PWD)/mau_top \
+		WAVES_DIR=$(PWD)/mau_top/wave \
+		TRACEFILE=$(WAVES_DIR)/$(TOPLEVEL)_$(TIMESTAMP).fst \
+		COMPILE_ARGS='$(COMPILE_ARGS) -DVCD_PATH="\"$(PWD)/mau_top/wave/mau_top_4b_$(TIMESTAMP).vcd\""'
+
 # Phony target for cleaning up
 .PHONY: clean
 clean::

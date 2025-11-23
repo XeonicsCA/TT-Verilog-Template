@@ -22,10 +22,12 @@ module rx_4b (
     output logic rx_valid       // Indicates all 20 bits received and ready
 );
     // Internal signals
-    // logic [3:0] rx_register; // [FIX 1] Removed rx_register
+    // logic [3:0] rx_register; // Removed rx_register
     logic [2:0] nibble_counter; // MOD-5 counter (0-4) for 5 nibbles
     logic spi_clk_prev;         // For edge detection
     logic spi_clk_rising;       // Rising edge detect
+    logic alu_ready_prev;       // Track prev alu ready state
+    logic alu_ready_falling;    // ALU ready falling-edge detect
     
     // Opcode and Operand Registers (20-bit instruction storage)
     logic [3:0] op_reg;         // Opcode register [3:0] (reduced from 8-bit)
@@ -33,6 +35,16 @@ module rx_4b (
     logic [3:0] a2_reg;         // Operand a2 register [3:0] (reduced from 8-bit)
     logic [3:0] b1_reg;         // Operand b1 register [3:0] (reduced from 8-bit)
     logic [3:0] b2_reg;         // Operand b2 register [3:0] (reduced from 8-bit)
+
+    // Track ALU ready to detect when an instruction has been accepted
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            alu_ready_prev <= 1'b0;
+        end else begin
+            alu_ready_prev <= alu_ready;
+        end
+    end
+    assign alu_ready_falling = alu_ready_prev & ~alu_ready;
 
     // Edge detection for SPI clock
     always_ff @(posedge clk or negedge rst_n) begin
@@ -44,8 +56,6 @@ module rx_4b (
     end
 
     assign spi_clk_rising = spi_clk & ~spi_clk_prev;
-
-    // [FIX 1] RX Register block removed. Data is sampled directly in the demux.
 
     // MOD-5 Nibble Counter
     always_ff @(posedge clk or negedge rst_n) begin
@@ -101,17 +111,24 @@ module rx_4b (
 
     // RX Valid signal - indicates complete 20-bit instruction received AND ready for processing
     // Only asserts when ALU is ready to prevent data corruption
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            rx_valid <= 1'b0;
-        end else if (spi_clk_rising && spi_w && (nibble_counter == 3'b100) && alu_ready) begin
-            rx_valid <= 1'b1; // Set valid only when last nibble received AND ALU ready
-        
-        // [FIX] Removed the 'else if (alu_ready)' condition that was clearing
-        // rx_valid too early and causing a 1-cycle pulse.
-        
-        end
-        // Hold rx_valid state if ALU is busy
+    // In addition, clear rx_valid once the ALU has accepted the instruction
+    // (detected via a falling edge on alu_ready), so back-to-back instructions
+    // can be distinguished cleanly at the decode/ALU boundary.
+    always_ff @(posedge clk or negedge rst_n) begin               // NEW
+        if (!rst_n) begin                                          // NEW
+            rx_valid <= 1'b0;                                      // NEW
+        end else if (spi_clk_rising && spi_w &&                    // NEW
+                     (nibble_counter == 3'b100) && alu_ready) begin// NEW
+            // NEW: Set valid only when the last nibble is received
+            // NEW: and the downstream ALU path is ready to take it.
+            rx_valid <= 1'b1;                                      // NEW
+        end else if (alu_ready_falling) begin                      // NEW
+            // NEW: Once the ALU has accepted this instruction
+            // NEW: (cmd_ready/alu_ready has gone 1->0), drop rx_valid
+            // NEW: so the next 5-nibble transfer is treated as a new instruction.
+            rx_valid <= 1'b0;                                      // NEW
+        end                                                        // NEW
+        // Otherwise hold the current value of rx_valid.            // NEW
     end
 
 endmodule
