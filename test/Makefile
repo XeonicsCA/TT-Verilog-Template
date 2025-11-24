@@ -5,7 +5,8 @@
 SIM ?= verilator
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = alu_pkg.sv mau_top.sv rx_module.sv decode_module.sv alu_module.sv tx_module.sv
+PROJECT_SOURCES = alu_pkg.sv rx_module_4b.sv decode_module_4b.sv alu_module_4b.sv tx_module_4b.sv mau_top_4b.sv
+.DEFAULT_GOAL := test-top-4b
 
 # Auto-enable Verilator waves unless explicitly disabled
 VERILATOR_WAVES ?= 1
@@ -159,7 +160,7 @@ clean::
 
 
 .PHONY: all
-all: test-rx test-decode test-alu test-tx test-top
+all: test-rx-4b test-decode-4b test-alu-4b test-tx-4b test-top-4b
 
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
