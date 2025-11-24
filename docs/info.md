@@ -7,6 +7,9 @@ You can also include images in this folder and reference them in the markdown. E
 512 kb in size, and the combined size of all images must be less than 1 MB.
 -->
 
+<img src="./img/blockdiagram_v2.png" alt="Initial Proposal Block Diagram" width="2259">
+^^ UPDATE THIS WITH FINAL 4B BLOCK DIAGRAM
+
 ## How it works
 
 This 1x1 tile is a tiny math-accelerator unit (MAU) built around a 4-bit ALU pipeline.  
