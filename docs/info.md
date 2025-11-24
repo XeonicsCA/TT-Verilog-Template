@@ -9,8 +9,8 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-This 1x1 tile is a tiny math-accelerator built around a 4-bit ALU pipeline.  
-A host device talks to it over a simple SPI-style interface using the TinyTapeout pins.
+This 1x1 tile is a tiny math-accelerator unit (MAU) built around a 4-bit ALU pipeline.  
+A host device communicates with the MAU over a simple SPI-style interface using the TinyTapeout pins.
 
 Each operation is encoded as a 20-bit “instruction word”:
 
