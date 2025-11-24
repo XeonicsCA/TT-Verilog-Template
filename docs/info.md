@@ -36,7 +36,9 @@ The **ALU stage** is a single-cycle 4-bit core with:
 - Per lane multiplier blocks that can multiply, square, or pass values through
 - A combined post-stage that either concatenates the two lanes or adds/subtracts them
 
-By enabling or bypassing these blocks, different opcodes implement functionality such as:
+By enabling or bypassing these blocks, different opcodes implement functionality as outlined in the opcode table:
+
+<img src="./img/operation_table.png" alt="opcode table" width="2259">
 
 - `DOT2` – 2D dot product  
 - `VADD2` / `VSUB2` – vector add/sub  
