@@ -6,7 +6,16 @@ SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 PROJECT_SOURCES = alu_pkg.sv rx_module_4b.sv decode_module_4b.sv alu_module_4b.sv tx_module_4b.sv mau_top_4b.sv
-.DEFAULT_GOAL := test-top-4b
+ifeq ($(GATES),yes)
+    # ----- Gate-level (used by gl_test action) -----
+    # Use the standard TinyTapeout-style testbench and test.py
+    TOPLEVEL        := tb
+    MODULE          := test
+    VERILOG_SOURCES := $(PWD)/tb.v
+    PYTHONPATH      := $(PWD)
+else
+	.DEFAULT_GOAL := test-top-4b
+endif
 
 # Auto-enable Verilator waves unless explicitly disabled
 VERILATOR_WAVES ?= 1
