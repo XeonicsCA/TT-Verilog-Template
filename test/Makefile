@@ -2,7 +2,7 @@
 # See https://docs.cocotb.org/en/stable/quickstart.html for more info
 
 # defaults
-SIM ?= verilator
+SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 PROJECT_SOURCES = alu_pkg.sv rx_module_4b.sv decode_module_4b.sv alu_module_4b.sv tx_module_4b.sv mau_top_4b.sv

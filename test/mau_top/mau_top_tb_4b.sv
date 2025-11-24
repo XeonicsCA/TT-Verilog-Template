@@ -44,7 +44,7 @@ module mau_top_tb_4b ();
     `ifdef VCD_PATH
     initial begin
         $dumpfile(`VCD_PATH);
-        $dumpvars(0, mau_top_t);
+        $dumpvars(0, mau_top_tb_4b);
     end
     `endif
 
