@@ -1,8 +1,4 @@
-// SPDX-License-Identifier: Apache-2.0
-// Testbench wrapper for rx_4b module
-// Exposes internal signals for unit testing
-
-// 4-BIT VERSION OF RX_TB
+//Testbench wrapper for rx_4b module
 
 `timescale 1ns / 1ps
 `default_nettype none
@@ -11,24 +7,24 @@ module rx_tb_4b (
     input  wire       clk,
     input  wire       rst_n,
     
-    // SPI interface
-    input  wire       spi_clk,
-    input  wire       spi_w,
-    input  wire [3:0] mosi,      // 4-bit MOSI (reduced from 8-bit)
+    //SPI interface
+    input  wire       spi_clk,      //SPI clock signal
+    input  wire       spi_w,        //SPI write enable
+    input  wire [3:0] mosi,         //4-bit MOSI data line
     
-    // Control input
-    input  wire       alu_ready,
+    //Control input
+    input  wire       alu_ready,    //Signal indicating ALU is ready for new instruction
     
-    // Outputs - exposed registers
-    output wire [3:0] op_reg,    // 4-bit registers (reduced from 8-bit)
-    output wire [3:0] a1_reg,
-    output wire [3:0] a2_reg,
-    output wire [3:0] b1_reg,
-    output wire [3:0] b2_reg,
-    output wire       rx_valid
+    //Outputs
+    output wire [3:0] op_reg,       //Opcode register 
+    output wire [3:0] a1_reg,       //Operand A1 register 
+    output wire [3:0] a2_reg,       //Operand A2 register 
+    output wire [3:0] b1_reg,       //Operand B1 register 
+    output wire [3:0] b2_reg,       //Operand B2 register 
+    output wire       rx_valid      //Indicates complete instruction received
 );
 
-    // Instantiate the RX_4B module
+    //Instantiate the RX_4B module, Device Under Test (DUT)
     rx_4b rx_inst (
         .clk(clk),
         .rst_n(rst_n),
@@ -44,12 +40,12 @@ module rx_tb_4b (
         .rx_valid(rx_valid)
     );
 
-    // Simple clock for interactive waveform debugging (cocotb also drives clk)
+    //Clock generation handled by cocotb during testing
     initial begin
-        // Clock will be driven by cocotb
+        //Clock will be driven by cocotb
     end
 
-    // Convenient VCD dump for waveform viewers
+    //Generate VCD waveform dump for debugging if VCD_PATH is defined
     `ifdef VCD_PATH
     initial begin
         $dumpfile(`VCD_PATH);

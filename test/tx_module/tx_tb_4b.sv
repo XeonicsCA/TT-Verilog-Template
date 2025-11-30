@@ -1,34 +1,29 @@
-// SPDX-License-Identifier: Apache-2.0
-// Testbench wrapper for tx_4b module
-// Exposes I/O signals for cocotb unit testing
-
-// 4-BIT VERSION OF TX_TB
+//Testbench wrapper for tx_4b module
 
 `timescale 1ns / 1ps
 `default_nettype none
 
 module tx_tb_4b;
+    //System signals
+    logic clk;              //System clock
+    logic rst_n;            //Active low reset
+    
+    //SPI interface signals
+    logic spi_clk;          //SPI clock
+    logic spi_r;            //SPI read enable
+    
+    //ALU interface, simulated ALU for TX tests
+    logic [9:0] res_data;   //10 bit result data from ALU
+    logic       carry_in;   //Carry bit from ALU
+    logic       res_valid;  //Result valid signal from ALU
+    
+    //DUT Outputs
+    logic       res_ready;  //Ready signal to ALU
+    wire [3:0]  miso;       //4 bit MISO output line
+    wire        carry_out;  //Carry output
+    wire        tx_done;    //Transmission complete flag
 
-    // System clock and reset
-    logic clk;
-    logic rst_n;
-    
-    // SPI interface
-    logic spi_clk;
-    logic spi_r;          // SPI read enable (driven by test)
-    
-    // ALU interface (driven by test)
-    logic [9:0] res_data;
-    logic       carry_in;
-    logic       res_valid;
-    
-    // DUT Outputs (monitored by test)
-    logic       res_ready;
-    wire [3:0]  miso;
-    wire        carry_out;
-    wire        tx_done;
-
-    // Instantiate the TX_4B module (Device Under Test)
+    //Instantiate the TX_4B module, Device Under Test (DUT)
     tx_4b dut (
         .clk(clk),
         .rst_n(rst_n),
@@ -45,13 +40,13 @@ module tx_tb_4b;
         .tx_done(tx_done)
     );
 
-    // Simple clock for interactive waveform debugging (cocotb also drives clk)
+    //Generate 100MHz clock for simulation
     initial begin
         clk = 1'b0;
-        forever #5 clk = ~clk; // 100 MHz
+        forever #5 clk = ~clk; // Toggle every 5ns
     end
 
-    // Convenient VCD dump for waveform viewers
+    //Generate VCD waveform dump for debugging if VCD_PATH is defined
     `ifdef VCD_PATH
     initial begin
         $dumpfile(`VCD_PATH);

@@ -1,17 +1,13 @@
-# SPDX-License-Identifier: Apache-2.0
-# Unit tests for rx_4b module via the rx_tb_4b wrapper.
-# These focus on SPI write behavior, register loading, and edge cases.
-
-# 4-BIT VERSION OF TEST_RX.PY
+# Unit tests for rx_4b module
 
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, ClockCycles
 
-CLK_NS = 10  # 100 MHz
+CLK_NS = 10  #100MHz system clock period
 
 async def reset(dut):
-    """Reset the RX module."""
+    #Reset the RX module and initialize all inputs to safe values
     dut.rst_n.value = 0
     dut.spi_clk.value = 0
     dut.spi_w.value = 0
@@ -22,106 +18,81 @@ async def reset(dut):
     await ClockCycles(dut.clk, 1)
 
 async def spi_write_nibble(dut, nibble_data, spi_clk_cycles=5):
-    """Simulates writing one nibble (4 bits) via SPI.
+    #Simulates writing one nibble via SPI
+    #Generates a complete SPI clock cycle to transfer data from master to DUT
     
-    Args:
-        dut: The device under test
-        nibble_data: 4-bit value to write (0x0 to 0xF)
-        spi_clk_cycles: Number of system clocks per SPI clock edge
-    """
-    dut.mosi.value = nibble_data & 0xF  # Mask to 4 bits
+    dut.mosi.value = nibble_data & 0xF
     
-    # SPI clock low
+    #SPI clock low phase
     dut.spi_clk.value = 0
     await ClockCycles(dut.clk, spi_clk_cycles)
     
-    # SPI clock high (data is sampled here)
+    #SPI clock high phase
     dut.spi_clk.value = 1
     await ClockCycles(dut.clk, spi_clk_cycles)
     
-    # SPI clock low (end on low)
+    #SPI clock low phase
     dut.spi_clk.value = 0
     await ClockCycles(dut.clk, spi_clk_cycles)
 
 @cocotb.test()
 async def test_rx_happy_path(dut):
-    """Validate RX module loads registers correctly during normal operation.
-
-    What this test verifies:
-      - RX module correctly samples MOSI data on SPI clock edges
-      - All five registers (op_reg, a1_reg, a2_reg, b1_reg, b2_reg) are loaded
-        in sequence across 5 SPI write cycles
-      - Nibble counter increments correctly through the write sequence
-      - rx_valid output asserts after all nibbles are received
-
-    Expected outcome:
-      - After 5 SPI write cycles with SPI_W=1:
-        - op_reg == 0x9
-        - a1_reg == 0xA
-        - a2_reg == 0xE
-        - b1_reg == 0x4
-        - b2_reg == 0x8
-        - rx_valid == 1
-    """
+    #Validate RX module loads registers correctly during normal operation
+    #Verifies the RX module correctly samples MOSI data on SPI clock edges
+    #Verifies all 5 registers are loaded in sequence across 5 SPI write cycles
+    #Verifies the nibble counter correctly incremented throughout the write sequence
+    #Verifies the rx_valid output asserts after all nibbles are received
+    
     cocotb.start_soon(Clock(dut.clk, CLK_NS, units="ns").start())
     await reset(dut)
 
-    instruction = [0x9, 0xA, 0xE, 0x4, 0x8]  # [OP, A1, A2, B1, B2] - 4-bit values
+    instruction = [0x9, 0xA, 0xE, 0x4, 0x8]  #[OP, A1, A2, B1, B2]
 
-    # Assert SPI_W to enable writing
+    #Assert SPI_W to enable writing
     dut.spi_w.value = 1
     await ClockCycles(dut.clk, 1)
 
-    # Write all 5 nibbles of the instruction
+    #Write all 5 nibbles of the instruction sequentially
     for nibble_val in instruction:
         await spi_write_nibble(dut, nibble_val)
 
-    # De-assert SPI_W
+    #Deassert SPI_W to signal end of write
     dut.spi_w.value = 0
     await ClockCycles(dut.clk, 2)
 
-    # Verify all registers loaded correctly
+    #Verify all registers loaded correctly
     assert int(dut.op_reg.value) == 0x9, f"Expected op_reg=0x9, got {hex(int(dut.op_reg.value))}"
     assert int(dut.a1_reg.value) == 0xA, f"Expected a1_reg=0xA, got {hex(int(dut.a1_reg.value))}"
     assert int(dut.a2_reg.value) == 0xE, f"Expected a2_reg=0xE, got {hex(int(dut.a2_reg.value))}"
     assert int(dut.b1_reg.value) == 0x4, f"Expected b1_reg=0x4, got {hex(int(dut.b1_reg.value))}"
     assert int(dut.b2_reg.value) == 0x8, f"Expected b2_reg=0x8, got {hex(int(dut.b2_reg.value))}"
     
-    # Verify rx_valid is asserted
+    #Verify rx_valid is asserted after complete instruction
     assert int(dut.rx_valid.value) == 1, "rx_valid should assert after complete write"
 
 @cocotb.test()
 async def test_rx_interrupted_write(dut):
-    """Verify RX module behavior when SPI write is interrupted.
-
-    What this test verifies:
-      - When SPI_W is deasserted mid-write, the nibble counter should reset
-      - A subsequent complete write should load registers correctly
-      - Incomplete writes should not corrupt the final register values
-
-    Expected outcome:
-      - After interrupted write (3 nibbles) then complete write (5 nibbles):
-        - Registers contain values from the complete write, not corrupted
-        - op_reg == 0x9 (not corrupted by interrupted write)
+    #Verify RX module behavior when SPI write is interrupted
+    #Verifies when SPI_W is deasserted mid write, the nibble counter is resetted
+    #Verifies that a subsequent compelte write should load registers correctly
+    #Verifies incompelte writes should not corrupt the final register values
     
-    Note: This test may FAIL if nibble_counter does not reset when SPI_W goes low.
-    """
     cocotb.start_soon(Clock(dut.clk, CLK_NS, units="ns").start())
     await reset(dut)
 
     instruction = [0x9, 0xA, 0xE, 0x4, 0x8]
 
-    # Write 3 nibbles, then interrupt
+    #Write 3 nibbles, then interrupt by deasserting SPI_W
     dut.spi_w.value = 1
     await spi_write_nibble(dut, instruction[0])  # op_reg
     await spi_write_nibble(dut, instruction[1])  # a1_reg
     await spi_write_nibble(dut, instruction[2])  # a2_reg
 
-    # Interrupt the write by deasserting SPI_W
+    #Interrupt the write by deasserting SPI_W
     dut.spi_w.value = 0
     await ClockCycles(dut.clk, 10)
 
-    # Start a new, complete write
+    #Start new complete write sequence
     dut.spi_w.value = 1
     for nibble_val in instruction:
         await spi_write_nibble(dut, nibble_val)
@@ -129,7 +100,7 @@ async def test_rx_interrupted_write(dut):
     dut.spi_w.value = 0
     await ClockCycles(dut.clk, 2)
 
-    # Verify registers contain correct values from complete write
+    #Verify registers contain correct values from complete write
     op_reg_val = int(dut.op_reg.value)
     a1_reg_val = int(dut.a1_reg.value)
     a2_reg_val = int(dut.a2_reg.value)
@@ -144,35 +115,29 @@ async def test_rx_interrupted_write(dut):
 
 @cocotb.test()
 async def test_rx_reset_during_write(dut):
-    """Verify system reset clears RX registers during an active write.
-
-    What this test verifies:
-      - Registers can be loaded normally during a write
-      - System reset (rst_n) clears all registers immediately
-      - Nibble counter and state machine reset properly
-
-    Expected outcome:
-      - After loading 2 nibbles, registers should contain those values
-      - After asserting reset, all registers should be cleared to 0
-    """
+    #Verify system reset clears RX registers during an active write
+    #Verifies registers can be loaded normally during a write command
+    #Verifies rst_n clears all registers immediately
+    #Verifies the nibble counter and state machine reset properly
+    
     cocotb.start_soon(Clock(dut.clk, CLK_NS, units="ns").start())
     await reset(dut)
 
     instruction = [0x9, 0xA, 0xE, 0x4, 0x8]
 
-    # Start writing and load 2 nibbles
+    #Start writing and load 2 nibbles
     dut.spi_w.value = 1
     await spi_write_nibble(dut, instruction[0])  # op_reg
     await spi_write_nibble(dut, instruction[1])  # a1_reg
 
-    # Verify registers loaded
+    #Verify registers loaded before reset
     a1_reg_val = int(dut.a1_reg.value)
     assert a1_reg_val == 0xA, "a1_reg was not loaded correctly before reset"
 
-    # Apply system reset
+    #Apply system reset
     await reset(dut)
 
-    # Verify all registers cleared
+    #Verify all registers cleared after reset
     assert int(dut.op_reg.value) == 0, f"op_reg did not clear on reset. Value: {hex(int(dut.op_reg.value))}"
     assert int(dut.a1_reg.value) == 0, f"a1_reg did not clear on reset. Value: {hex(int(dut.a1_reg.value))}"
     assert int(dut.a2_reg.value) == 0, f"a2_reg did not clear on reset. Value: {hex(int(dut.a2_reg.value))}"
@@ -182,46 +147,39 @@ async def test_rx_reset_during_write(dut):
 
 @cocotb.test()
 async def test_rx_multiple_writes(dut):
-    """Verify RX module can handle multiple consecutive instruction writes.
-
-    What this test verifies:
-      - After completing one write, the module can accept another
-      - rx_valid pulses appropriately between writes
-      - Register values update correctly for each new instruction
-
-    Expected outcome:
-      - First instruction loads correctly
-      - Second instruction overwrites with new values
-      - Each write produces correct register values
-    """
+    #Verify RX module can handle multiple consecutive instruction writes.
+    #Verifies after completing one write, the module can accept a subsequent one
+    #Verifies rx_valid pulses as expected between writes
+    #Verifies register values update correctly for each new instruction
+    
     cocotb.start_soon(Clock(dut.clk, CLK_NS, units="ns").start())
     await reset(dut)
 
     instruction_1 = [0x1, 0x5, 0xA, 0xF, 0x4]
     instruction_2 = [0x6, 0x9, 0xE, 0x3, 0x8]
 
-    # First write
+    #First write sequence
     dut.spi_w.value = 1
     for nibble_val in instruction_1:
         await spi_write_nibble(dut, nibble_val)
     dut.spi_w.value = 0
     await ClockCycles(dut.clk, 2)
 
-    # Verify first instruction
+    #Verify first instruction loaded correctly
     assert int(dut.op_reg.value) == 0x1, "First instruction op_reg incorrect"
     assert int(dut.a1_reg.value) == 0x5, "First instruction a1_reg incorrect"
 
-    # Wait between writes
+    #Wait between writes
     await ClockCycles(dut.clk, 5)
 
-    # Second write
+    #Second write sequence
     dut.spi_w.value = 1
     for nibble_val in instruction_2:
         await spi_write_nibble(dut, nibble_val)
     dut.spi_w.value = 0
     await ClockCycles(dut.clk, 2)
 
-    # Verify second instruction overwrote correctly
+    #Verify second instruction overwrote correctly
     assert int(dut.op_reg.value) == 0x6, "Second instruction op_reg incorrect"
     assert int(dut.a1_reg.value) == 0x9, "Second instruction a1_reg incorrect"
     assert int(dut.a2_reg.value) == 0xE, "Second instruction a2_reg incorrect"
@@ -230,29 +188,22 @@ async def test_rx_multiple_writes(dut):
 
 @cocotb.test()
 async def test_rx_without_spi_w(dut):
-    """Verify RX module ignores SPI clocks when SPI_W is not asserted.
-
-    What this test verifies:
-      - Without SPI_W asserted, SPI clock edges should not load data
-      - Registers should remain at their reset values (0)
-      - rx_valid should remain low
-
-    Expected outcome:
-      - After SPI clock cycles without SPI_W=1:
-        - All registers remain 0
-        - rx_valid == 0
-    """
+    #Verify RX module ignores SPI clocks when SPI_W is not asserted
+    #Verifies without SPI_W asserted, SPI clock edges should not load data
+    #Verifies registers should remain at 0
+    #Verifies rx_valid should remain low
+    
     cocotb.start_soon(Clock(dut.clk, CLK_NS, units="ns").start())
     await reset(dut)
 
-    # Try to write without asserting SPI_W
+    #Try to write without asserting SPI_W
     dut.spi_w.value = 0  # Keep SPI_W low
     await spi_write_nibble(dut, 0x9)
     await spi_write_nibble(dut, 0xA)
     await spi_write_nibble(dut, 0x4)
     await ClockCycles(dut.clk, 2)
 
-    # Verify no registers were loaded
+    #Verify no registers were loaded
     assert int(dut.op_reg.value) == 0, "op_reg should not load without SPI_W"
     assert int(dut.a1_reg.value) == 0, "a1_reg should not load without SPI_W"
     assert int(dut.a2_reg.value) == 0, "a2_reg should not load without SPI_W"
@@ -260,71 +211,58 @@ async def test_rx_without_spi_w(dut):
 
 @cocotb.test()
 async def test_rx_alu_backpressure(dut):
-    """Verify RX module respects ALU backpressure.
-
-    What this test verifies:
-      - When alu_ready=0 and instruction complete, rx_valid should NOT assert
-      - When alu_ready=1, rx_valid can assert after complete instruction
-      - Registers hold their values when ALU is busy
-
-    Expected outcome:
-      - With alu_ready=0: rx_valid stays low after complete write
-      - After setting alu_ready=1: rx_valid asserts
-    """
+    #Verify RX module works with ALU backpressure
+    #Verifies that when alu_ready=0 and instruction is compelte, rx_valid should not assert
+    #Verifies that when alu_ready=1, rx_valid can assert after a complete instruction
+    #Verifies registers hold their values when ALU is busy
+    
     cocotb.start_soon(Clock(dut.clk, CLK_NS, units="ns").start())
     await reset(dut)
 
     instruction = [0x9, 0xA, 0xE, 0x4, 0x8]
 
-    # Set ALU to busy before starting write
+    #Set ALU to busy before starting write
     dut.alu_ready.value = 0
 
-    # Write complete instruction
+    #Write complete instruction while ALU is busy
     dut.spi_w.value = 1
     for nibble_val in instruction:
         await spi_write_nibble(dut, nibble_val)
     dut.spi_w.value = 0
     await ClockCycles(dut.clk, 2)
 
-    # Verify rx_valid did NOT assert because ALU was busy
+    #Verify rx_valid did not assert because ALU was busy
     assert int(dut.rx_valid.value) == 0, "rx_valid should not assert when alu_ready=0"
 
-    # Now signal ALU is ready
+    #Signal ALU is ready
     dut.alu_ready.value = 1
     await ClockCycles(dut.clk, 2)
 
-    # rx_valid should remain low because we need a new write when ALU becomes ready
-    # (Based on the logic, rx_valid only asserts during the write of the last nibble)
+    #rx_valid remains low because it needs a new write when ALU becomes ready
     assert int(dut.rx_valid.value) == 0, "rx_valid cleared after ALU ready"
 
-    # Verify registers still hold the data
+    #Verify registers still hold the data
     assert int(dut.op_reg.value) == 0x9, "Registers should hold data during backpressure"
 
 @cocotb.test()
 async def test_rx_all_zeros(dut):
-    """Verify RX module handles all-zero instruction correctly.
+    #Verify RX module handles all-zero instruction correctly
+    #Verifies the module can handle 0x0 vlaues in all fields
+    #Verifies rx_valid still asserts for valid 0 instruction
 
-    What this test verifies:
-      - Module can handle 0x0 values in all fields
-      - rx_valid still asserts for valid zero instruction
-
-    Expected outcome:
-      - All registers == 0x0 after write
-      - rx_valid == 1
-    """
     cocotb.start_soon(Clock(dut.clk, CLK_NS, units="ns").start())
     await reset(dut)
 
     instruction = [0x0, 0x0, 0x0, 0x0, 0x0]
 
-    # Write all zeros
+    #Write all zeros
     dut.spi_w.value = 1
     for nibble_val in instruction:
         await spi_write_nibble(dut, nibble_val)
     dut.spi_w.value = 0
     await ClockCycles(dut.clk, 2)
 
-    # Verify all registers are zero
+    #Verify all registers are zero
     assert int(dut.op_reg.value) == 0x0, "op_reg should be 0x0"
     assert int(dut.a1_reg.value) == 0x0, "a1_reg should be 0x0"
     assert int(dut.a2_reg.value) == 0x0, "a2_reg should be 0x0"
@@ -334,29 +272,23 @@ async def test_rx_all_zeros(dut):
 
 @cocotb.test()
 async def test_rx_all_ones(dut):
-    """Verify RX module handles all-ones (0xF) instruction correctly.
+    #Verify RX module handles all-ones (0xF) instruction correctly.
+    #Verifies module can handle a maximum of 4 bit values in all fields
+    #Verifies rx_valiod still asserts for valid maximum value instruction
 
-    What this test verifies:
-      - Module can handle maximum 4-bit values (0xF) in all fields
-      - rx_valid still asserts for valid max-value instruction
-
-    Expected outcome:
-      - All registers == 0xF after write
-      - rx_valid == 1
-    """
     cocotb.start_soon(Clock(dut.clk, CLK_NS, units="ns").start())
     await reset(dut)
 
     instruction = [0xF, 0xF, 0xF, 0xF, 0xF]
 
-    # Write all ones
+    #Write all ones
     dut.spi_w.value = 1
     for nibble_val in instruction:
         await spi_write_nibble(dut, nibble_val)
     dut.spi_w.value = 0
     await ClockCycles(dut.clk, 2)
 
-    # Verify all registers are 0xF
+    #Verify all registers are 0xF
     assert int(dut.op_reg.value) == 0xF, "op_reg should be 0xF"
     assert int(dut.a1_reg.value) == 0xF, "a1_reg should be 0xF"
     assert int(dut.a2_reg.value) == 0xF, "a2_reg should be 0xF"
