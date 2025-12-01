@@ -101,3 +101,58 @@ Final verification, completed documentation and github - Nov 26
 
 Evaluation of final submissions and docs - Dec 3
  - Submit for tapeout
+
+## How to Test
+
+This section provides a basic example of how to interact with the MAU hardware once it's fabricated on the TinyTapeout chip. The code snippet demonstrates loading a 40-bit instruction and reading the result through the SPI-like interface.
+
+```python
+def send_instruction(tt, opcode, operands):
+    #Load a 40-bit instruction into the MAU over 5 SPI clock cycles.
+    #Args:
+    #    tt: TinyTapeout interface object
+    #    opcode: 8-bit operation code (e.g., 0x01 for DOT2)
+    #    operands: List of four 8-bit operands [x0, x1, y0, y1]
+    
+    #Pack instruction into 5 bytes: [opcode, x0, x1, y0, y1]
+    instruction_bytes = [opcode] + operands
+    
+    #Send each byte sequentially over the 8-bit input bus
+    for byte in instruction_bytes:
+        tt.input_byte = byte           #Place byte on ui_in[7:0]
+        tt.uio.SPI_W = 1               #Assert write enable signal
+        tt.clock_tick()                #Rising edge of SPI_clk to latch data
+        tt.uio.SPI_W = 0               #Deassert write enable
+    
+def read_result(tt, num_bytes=3):
+    #Read the result from the MAU over multiple SPI clock cycles.
+    #Args:
+    #    tt: TinyTapeout interface object
+    #    num_bytes: Number of 8-bit chunks to read (3-5 depending on result size)
+    #Returns:
+    #    List of bytes representing the result (LSB first)
+
+    result_bytes = []
+    
+    #Read each byte of the result sequentially
+    for _ in range(num_bytes):
+        tt.uio.SPI_R = 1                     #Assert read enable signal
+        tt.clock_tick()                      #Rising edge of SPI_clk to output next byte
+        result_bytes.append(tt.output_byte)  #Capture byte from ui_out[7:0]
+        tt.uio.SPI_R = 0                     #Deassert read enable
+    
+    return result_bytes
+
+#Example usage: Compute 2x1 vector dot product (DOT2)
+#Operation: x0*x1 + y0*y1 = 2*3 + 4*5 = 6 + 20 = 26
+send_instruction(tt, opcode=0x01, operands=[2, 3, 4, 5])
+
+#Read 3 bytes of result (18-bit result + carry spans 3 bytes)
+result = read_result(tt, num_bytes=3)
+
+#Reconstruct the full result from received bytes
+final_result = result[0] | (result[1] << 8) | (result[2] << 16)
+print(f"DOT2 result: {final_result}")  # Expected: 26
+```
+
+The MAU processes instructions through its custom SPI interface, reading operands in sequence and returning results across multiple clock cycles to accommodate the 18-bit output width on an 8-bit bus.
