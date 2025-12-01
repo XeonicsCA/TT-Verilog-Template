@@ -1,29 +1,10 @@
-// switched from definitions to localparams
-// `define NOOP 0x00
-// `define DOT2 0x01
-// `define WSUM 0x02
-// `define PROJU 0x03
-// `define SUMSQ 0x04
-// `define SCSUM 0x05
-// `define VADD2 0x06
-// `define VSUB2 0x07
-// `define DIFF2 0x08
-// `define DET2 0x09
-// `define DIFFSQ 0x0A
-// `define DIST2 0x0B
-// `define POLY 0x0C
-// `define SCMUL 0x0D
-// `define LERPX 0x0E
-// `define LERPY 0x0F
-
-// 4-BIT VERSION OF DECODE_MODULE
+// Decode Stage Module
+// takes in 4 bit op code from instruction and operands
+// outputs alu_ctrl_t containing all alu stage control signals
 
 `timescale 1ns/1ps
 `default_nettype none
 
-// takes in 4 bit op code from instruction and operands
-// outputs alu_ctrl_t containing all alu stage control signals
-// and routes operands to appropriate ALU lanes
 module decode_stage_4b (
 	input	logic 		clk,           // System clock
 	input	logic 		rst_n,         // Active low reset
@@ -231,8 +212,8 @@ module decode_stage_4b (
 		endcase
 	end
 	
-	// Minimal handshaking logic
-	// Pass through cmd_ready_in from ALU to RX stage
+	// handshaking logic
+	// pass through cmd_ready_in from ALU to RX stage
 	assign alu_ready_out = cmd_ready_in;
 	
 	// Generate cmd_valid_out to ALU based on rx_valid_in and cmd_ready_in

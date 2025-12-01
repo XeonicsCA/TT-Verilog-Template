@@ -1,10 +1,9 @@
+// 4-bit ALU unit test wrapper
+// Drives alu_stage_4b
+// Fans out control fields for driving using Python and repacks into alu_ctrl_t
+
 `timescale 1ns/1ps
 `default_nettype none
-
-// 4-bit ALU unit test wrapper
-// - Drives alu_stage_4b
-// - Fans out control fields for easy driving from Python and repacks into alu_ctrl_t
-
 
 module alu_tb_4b;
 

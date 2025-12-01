@@ -1,14 +1,10 @@
-`default_nettype none
-`timescale 1ns/1ps
-
-// 4-BIT VERSION OF DECODE_TB
-
-// Standalone unit-test wrapper for the decode_stage module.
+// 4-bit Decode unit test wrapper
 // Exposes simple pins that cocotb (test_decode.py) can drive & observe.
 // Uses the packed struct type from alu_pkg for the control bus, and also
 // provides a flattened view (ctrl_flat) for easy access from cocotb.
 
-// EXTRA_ARGS="--timing" make SIM=verilator test-decode
+`default_nettype none
+`timescale 1ns/1ps
 
 module decode_tb_4b;
 

@@ -1,7 +1,10 @@
+// ALU Stage Module
+// Contains submodules for pre-adder, multiplier, and post adder
+// alu_stage_4b passes operands and control signals into each module creating the final 10-bit result
+// result is registered until handshake with tx-stage signals its been outputted
+
 `timescale 1ns/1ps
 `default_nettype none
-
-// 4-BIT VERSION OF ALU_MODULE
 
 // adds two 4 bit values together, 5 bit output
 // supports subtraction
@@ -88,6 +91,9 @@ module add10 (
 	end
 endmodule
 
+// ALU module that takes in 4 operands
+// passes to required sub modules based on control signaling
+// and registers 10-bit result (holds until handshake complete)
 module alu_stage_4b (
 	input	logic			clk, rst_n,
 	input	logic [3:0]		x0, x1,		// inputs from operand router
@@ -167,10 +173,7 @@ module alu_stage_4b (
 					.res(res_d),
 					.carry(carry_d));
 
-	// --------------------------------------------------------------------
-	// Register result and ready/valid logic
-	// --------------------------------------------------------------------
-	// Internal registered valid flag
+	// internal registered valid flag
 	logic res_valid_q;
 
 	// Handshake: stage is ready when it is not holding a result,
