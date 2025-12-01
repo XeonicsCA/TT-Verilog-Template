@@ -104,14 +104,14 @@ Evaluation of final submissions and docs - Dec 3
 
 ## How to Test
 
-This section provides a basic example of how to interact with the MAU hardware once it's fabricated on the TinyTapeout chip. The code snippet demonstrates loading a 40-bit instruction and reading the result through the SPI-like interface.
+This section provides a basic example of how to interact with the MAU hardware once it's fabricated on the TinyTapeout chip. The code snippet demonstrates loading a 40 bit instruction and reading the result through the psuedo SPI interface.
 
 ```python
 def send_instruction(tt, opcode, operands):
-    #Load a 40-bit instruction into the MAU over 5 SPI clock cycles.
+    #Load a 40 bit instruction into the MAU over 5 SPI clock cycles.
     #Args:
     #    tt: TinyTapeout interface object
-    #    opcode: 8-bit operation code (e.g., 0x01 for DOT2)
+    #    opcode: 8 bit operation code (e.g., 0x01 for DOT2)
     #    operands: List of four 8-bit operands [x0, x1, y0, y1]
     
     #Pack instruction into 5 bytes: [opcode, x0, x1, y0, y1]
@@ -128,7 +128,7 @@ def read_result(tt, num_bytes=3):
     #Read the result from the MAU over multiple SPI clock cycles.
     #Args:
     #    tt: TinyTapeout interface object
-    #    num_bytes: Number of 8-bit chunks to read (3-5 depending on result size)
+    #    num_bytes: Number of 8 bit chunks to read (3-5 depending on result size)
     #Returns:
     #    List of bytes representing the result (LSB first)
 
