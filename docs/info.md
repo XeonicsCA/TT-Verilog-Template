@@ -59,22 +59,22 @@ By enabling or bypassing these blocks, different opcodes implement functionality
 
 | Operation | OPCODE | Formula Index                                  | a0 | a1 | b0 | b1 | Notes                                                                                 |
 |----------|--------|---------------------------------------------|----|----|----|----|---------------------------------------------------------------------------------------|
-| NOOP     | 0x00   | 0 : a0, a1, b0, b1                                           | x0 | x1 | y0 | y1 | returns input                                                                         |
-| DOT2     | 0x01   | 1 : (a0\*a1) + (b0\*b1)                       | x0 | y0 | x1 | y1 |                                                                                       |
-| WSUM     | 0x02   | 1                                           | x  | a  | y  | b  |                                                                                       |
-| PROJ     | 0x03   | 1                                           | x  | ux | x  | uy |                                                                                       |
-| SUMSQ    | 0x04   | 1                                           | x  | x  | y  | y  |                                                                                       |
-| SCSUM    | 0x05   | 1                                           | x  | c  | y  | c  |                                                                                       |
-| VADD2    | 0x06   | 2 : (a0 + a1), (b0 + b1)                      | x0 | y0 | x1 | y1 |                                                                                       |
-| VSUB2    | 0x07   | 3 : (a0 - a1), (b0 - b1)                      | x0 | y0 | x1 | y1 | order into each lane matters                                                          |
-| DIFF2    | 0x08   | 4 : (a0\*a1) - (b0\*b1)                       | x0 | x1 | y0 | x1 | order of lanes matter                                                                 |
-| DET2     | 0x09   | 4                                           | x0 | y1 | y0 | x1 | order of lanes matter                                                                 |
-| DIFFSQ   | 0x0A   | 4                                           | x  | x  | y  | y  | order of lanes matter                                                                 |
-| DIST2    | 0x0B   | 5 : (a0 - a1)^2 - (b0 - b1)^2                 | x0 | x1 | y0 | y1 | order into and of each lane matters                                                   |
-| POLY     | 0x0C   | 6 : (a0\*a1) + (b0)                           | a  | x  | b  | -  |                                                                                       |
-| SCMUL    | 0x0D   | 7 : (a0\*a1), (b0\*b1)                        | a  | b  | x  | y  | output concats to lower 9 bits for each lane                                          |
-| LERPX    | 0x0E   | 8 : (a0) + (a1\*(b1-b0))                      | x1 | c  | y0 | y1 | order into and of each lane matters, c = (y2-y1)/(x2-x1)                             |
-| LERPY    | 0x0F   | 9 : (b0) + (b1\*(a1-a0))                      | x0 | x1 | y1 | c  | order into and of each lane matters, c = (y2-y1)/(x2-x1)                             |
+| NOOP     | 0x00   | 0. a<sub>0</sub>, a<sub>1</sub>, b<sub>0</sub>, b<sub>1</sub>                        | x<sub>0</sub> | x<sub>1</sub> | y<sub>0</sub> | y<sub>1</sub> | returns input                                                                         |
+| DOT2     | 0x01   | 1. a<sub>0</sub>\*a<sub>1</sub> + b<sub>0</sub>\*b<sub>1</sub>                       | x<sub>0</sub> | y<sub>0</sub> | x<sub>1</sub> | y<sub>1</sub> |                                                                                       |
+| WSUM     | 0x02   | 1.                                                                                   | x  | a  | y  | b  |                                                                                       |
+| PROJ     | 0x03   | 1.                                                                                   | x  | u<sub>x</sub> | x  | u<sub>y</sub> |                                                                                       |
+| SUMSQ    | 0x04   | 1.                                                                                   | x  | x  | y  | y  |                                                                                       |
+| SCSUM    | 0x05   | 1.                                                                                   | x  | c  | y  | c  |                                                                                       |
+| VADD2    | 0x06   | 2. (a<sub>0</sub> + a<sub>1</sub>), (b<sub>0</sub> + b<sub>1</sub>)                 | x0 | y0 | x1 | y1 |                                                                                       |
+| VSUB2    | 0x07   | 3. (a<sub>0</sub> - a<sub>1</sub>), (b<sub>0</sub> - b<sub>1</sub>)                 | x0 | y0 | x1 | y1 | order into each lane matters                                                          |
+| DIFF2    | 0x08   | 4. (a<sub>0</sub>\*a<sub>1</sub>) - (b<sub>0</sub>\*b<sub>1</sub>)                  | x0 | x1 | y0 | x1 | order of lanes matter                                                                 |
+| DET2     | 0x09   | 4.                                                                                   | x<sub>0</sub> | y<sub>1</sub> | y<sub>0</sub> | x<sub>1</sub> | order of lanes matter                                                                 |
+| DIFFSQ   | 0x0A   | 4.                                                                                   | x  | x  | y  | y  | order of lanes matter                                                                 |
+| DIST2    | 0x0B   | 5. (a<sub>0</sub> - a<sub>1</sub>)² - (b<sub>0</sub> - b<sub>1</sub>)²              | x<sub>0</sub> | x<sub>1</sub> | y<sub>0</sub> | y<sub>1</sub> | order into and of each lane matters                                                   |
+| POLY     | 0x0C   | 6. (a<sub>0</sub>\*a<sub>1</sub>) + (b<sub>0</sub>)                                 | a  | x  | b  | -  |                                                                                       |
+| SCMUL    | 0x0D   | 7. (a<sub>0</sub>\*a<sub>1</sub>), (b<sub>0</sub>\*b<sub>1</sub>)                    | a  | b  | x  | y  | output concats to lower 9 bits for each lane                                          |
+| LERPX    | 0x0E   | 8. (a<sub>0</sub>) + (a<sub>1</sub>\*(b<sub>1</sub> - b<sub>0</sub>))                  | x<sub>1</sub> | c  | y<sub>0</sub> | y<sub>1</sub> | order into and of each lane matters, c = (y2-y1)/(x2-x1)                             |
+| LERPY    | 0x0F   | 9. (b<sub>0</sub>) + (b<sub>1</sub>\*(a<sub>1</sub> - a<sub>0</sub>))                 | x<sub>0</sub> | x<sub>1</sub> | y<sub>1</sub> | c  | order into and of each lane matters, c = (y2-y1)/(x2-x1)                             |
 
 - `DOT2` – 2D dot product  
 - `VADD2` / `VSUB2` – vector add/sub  
