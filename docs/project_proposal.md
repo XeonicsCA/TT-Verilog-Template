@@ -104,7 +104,7 @@ Evaluation of final submissions and docs - Dec 3
 
 ## How to Test
 
-This section provides a basic example of how to interact with the MAU hardware once it's fabricated on the TinyTapeout chip. The code snippet demonstrates loading a 40 bit instruction and reading the result through the psuedo SPI interface.
+This section provides a basic example of how to interact with the MAU hardware once it's fabricated on the TinyTapeout chip. The code snippet demonstrates loading a 40 bit (upper half of each byte is unused) instruction and reading the result through the psuedo SPI interface.
 
 ```python
 def send_instruction(tt, opcode, operands):
