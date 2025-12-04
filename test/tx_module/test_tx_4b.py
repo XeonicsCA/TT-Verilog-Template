@@ -90,9 +90,13 @@ async def test_tx_happy_path(dut):
     n3 = await spi_read_nibble(dut)
     n4 = await spi_read_nibble(dut)
     
+    #0x3A5, carry = 1
+    # n0 = res[3:0] = 0x5
+    # n1 = res[7:4] = 0xA
+    # n2 = {0, carry, res[9:8]} = {0, 1, 0b11} = 0x7
     assert n0 == 0x5, f"Nibble 0 incorrect: expected 0x5, got {hex(n0)}"
     assert n1 == 0xA, f"Nibble 1 incorrect: expected 0xA, got {hex(n1)}"
-    assert n2 == 0xE, f"Nibble 2 incorrect: expected 0xE, got {hex(n2)}"
+    assert n2 == 0x7, f"Nibble 2 incorrect: expected 0x7, got {hex(n2)}"
     assert n3 == 0x0, f"Nibble 3 incorrect: expected 0x0, got {hex(n3)}"
     assert n4 == 0x0, f"Nibble 4 incorrect: expected 0x0, got {hex(n4)}"
 
@@ -166,8 +170,11 @@ async def test_tx_alu_backpressure(dut):
     n4 = await spi_read_nibble(dut)
 
     #Verify we got the first result
+    # res = 0x111, carry = 1
+    # n0 = res[3:0] = 0x1
+    # n2 = {0, carry, res[9:8]} = 0x5
     assert n0 == 0x1, "Should have read 0x1 from first result"
-    assert n2 == 0x6, "Should have read 0x6 ({01, 1, 0}) from first result"
+    assert n2 == 0x5, "Should have read 0x5 ({0, 1, 01}) from first result"
 
     #tx_done pulses, tx_active goes low.
     await RisingEdge(dut.clk)

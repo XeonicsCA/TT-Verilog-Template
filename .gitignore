@@ -9,3 +9,10 @@ test/sim_build
 test/__pycache__/
 test/results.xml
 test/gate_level_netlist.v
+test/alu_module/__pycache__/
+test/decode_module/__pycache__/
+test/mau_top/__pycache__/
+test/rx_module/__pycache__/
+test/tx_module/__pycache__/
+test/decode_module/__pycache__/
+/tt

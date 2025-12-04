@@ -68,7 +68,7 @@ module tx_4b (
             //Capture new result from ALU into TX registers
             tx_reg0 <= res_data[3:0];                      //Lower nibble
             tx_reg1 <= res_data[7:4];                      //Middle nibble
-            tx_reg2 <= {res_data[9:8], carry_in, 1'b0};    //Upper 2 bits + carry + padding
+            tx_reg2 <= {1'b0, carry_in, res_data[9:8]};    //Padding + carry + upper 2 bits
             tx_reg3 <= 4'h0;                               //Status/flags
             tx_reg4 <= 4'h0;                               //Reserved/checksum
             result_captured <= 1'b1;
@@ -143,7 +143,7 @@ module tx_4b (
         if (!rst_n) begin
             tx_done <= 1'b0;
         //Assert done when last nibble has been transmitted
-        end else if (spi_clk_falling && spi_r && tx_active && (nibble_counter == 3'b100)) begin
+        end else if (spi_clk_falling && tx_active && (nibble_counter == 3'b100)) begin
             tx_done <= 1'b1;
         end else begin
             tx_done <= 1'b0; //This makes it a 1 cycle pulse

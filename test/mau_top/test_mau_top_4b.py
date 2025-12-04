@@ -232,7 +232,7 @@ async def spi_write_nibble(dut, nibble):
 
     #SPI clock low phase (end on low)
     dut.uio_in[0].value = 0
-    await ClockCycles(dut.clk, SPI_CLK_CYCLES)
+    #await ClockCycles(dut.clk, 1)
 
 
 async def spi_send_instruction(dut, op, a1, a2, b1, b2):
@@ -273,7 +273,7 @@ async def spi_read_nibble(dut):
 
     #End on low so TX sees a falling edge (increments counter)
     dut.uio_in[0].value = 0
-    await ClockCycles(dut.clk, 1)
+    #await ClockCycles(dut.clk, 1)
 
     return miso_val
 
@@ -286,12 +286,13 @@ async def spi_read_result(dut):
     dut.uio_in[2].value = 1  # spi_r = 1
 
     #Give TX a couple cycles to assert tx_active internally
-    await ClockCycles(dut.clk, 2)
+    #await ClockCycles(dut.clk, 2)
 
     #Read all 5 nibbles sequentially
     nibbles = [await spi_read_nibble(dut) for _ in range(5)]
 
     #Deassert read and ensure clock is low
+    #await ClockCycles(dut.clk, 1)
     dut.uio_in[2].value = 0
     dut.uio_in[0].value = 0
 
@@ -299,10 +300,11 @@ async def spi_read_result(dut):
     n0, n1, n2, _n3, _n4 = nibbles
 
     res_low = n0 | (n1 << 4)          #bits [7:0]
-    res_high = (n2 >> 2) & 0x3        #bits [9:8]
+    #res_high = (n2 >> 2) & 0x3        #bits [9:8]
+    res_high = n2 & 0b0011
     res = res_low | (res_high << 8)
 
-    carry = (n2 >> 1) & 0x1
+    carry = (n2 >> 2) & 0x1
 
     return res, carry, nibbles
 
@@ -315,7 +317,7 @@ async def mau_transaction(dut, op, a1, a2, b1, b2):
 
     #Allow RX/DECODE/ALU/TX pipeline to complete
     #Generous timing for safe operation
-    await ClockCycles(dut.clk, 15)
+    #await ClockCycles(dut.clk, 1)
 
     res, carry, nibbles = await spi_read_result(dut)
 
@@ -724,8 +726,8 @@ async def test_mau_extreme_operands_across_ops(dut):
 
 
 @cocotb.test()
-async def test_mau_noop_and_scalar_ops_sanity(dut):
-    #anity test for NOOP, DOT2, and SCMUL using randomly sampled operands.
+async def test_mau_noop_and_scalar_ops_stress(dut):
+    #Stress test for NOOP, DOT2, and SCMUL using randomly sampled operands.
     #NOOP uses the default ctrl path (no pre, no mul, no post).
     #DOT2 and SCMUL both involve x0*x1 and y0*y1 with different packing/post adder behaviour.
     
@@ -755,7 +757,7 @@ async def test_mau_noop_and_scalar_ops_sanity(dut):
             res, carry, _ = await mau_transaction(dut, op, a1, a2, b1, b2)
 
             msg = (
-                f"[sanity #{case_idx}] "
+                f"[stress #{case_idx}] "
                 f"op=0x{op:X}, a=({a1},{a2}), b=({b1},{b2}), "
                 f"exp_res={exp_res}, exp_carry={exp_carry}, "
                 f"res={res}, carry={carry}"
@@ -766,4 +768,4 @@ async def test_mau_noop_and_scalar_ops_sanity(dut):
             assert carry == exp_carry, msg + "<-- CARRY MISMATCH"
             case_idx += 1
     
-    dut._log.info(f"[sanity] Completed sampled sweep, total cases={case_idx}")
+    dut._log.info(f"[stress] Completed sampled sweep, total cases={case_idx}")
