@@ -92,9 +92,9 @@ The **TX stage** then serializes this result back to the host:
 
 All stages use valid/ready handshakes, so if the host stops reading results, backpressure propagates and the ALU will stop accepting new commands without losing any results.
 
-## How to test
+## How to Test
 
-Below is a basic example of how to interact with the MAU hardware on a fabricated TinyTapeout chip. This code snippet demonstrates loading a 40 bit instruction and reading the result through the psuedo SPI interface.
+This section provides a basic example of how to interact with the MAU hardware once it's fabricated on the TinyTapeout chip. The code snippet demonstrates loading a 40 bit (upper half of each byte is unused) instruction and reading the result through the psuedo SPI interface.
 
 ```python
 def send_instruction(tt, opcode, operands):
@@ -146,7 +146,3 @@ print(f"DOT2 result: {final_result}")  # Expected: 26
 ```
 
 The MAU processes instructions through its custom SPI interface, reading operands in sequence and returning results across multiple clock cycles to accommodate the 18-bit output width on an 8-bit bus.
-
-## External hardware
-
-List external hardware used in your project (e.g. PMOD, LED display, etc), if any
